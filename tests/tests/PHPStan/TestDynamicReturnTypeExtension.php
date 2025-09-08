@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WP_CLI\Tests\Tests\PHPStan;
+namespace FP_CLI\Tests\Tests\PHPStan;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 

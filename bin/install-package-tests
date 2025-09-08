@@ -1,12 +1,12 @@
 #!/bin/sh
 
 # Database credentials can be provided via environment variables:
-# - WP_CLI_TEST_DBHOST is the host to use and can include a port or a socket after a colon, i.e "127.0.0.1:33060" (defaults to "localhost")
-# - WP_CLI_TEST_DBROOTUSER is the user that has permission to administer databases and users (defaults to "root").
-# - WP_CLI_TEST_DBROOTPASS is the password to use for the above user (defaults to an empty password).
-# - WP_CLI_TEST_DBNAME is the database that the tests run under (defaults to "wp_cli_test").
-# - WP_CLI_TEST_DBUSER is the user that the tests run under (defaults to "wp_cli_test").
-# - WP_CLI_TEST_DBPASS is the password to use for the above user (defaults to "password1").
+# - FP_CLI_TEST_DBHOST is the host to use and can include a port or a socket after a colon, i.e "127.0.0.1:33060" (defaults to "localhost")
+# - FP_CLI_TEST_DBROOTUSER is the user that has permission to administer databases and users (defaults to "root").
+# - FP_CLI_TEST_DBROOTPASS is the password to use for the above user (defaults to an empty password).
+# - FP_CLI_TEST_DBNAME is the database that the tests run under (defaults to "fp_cli_test").
+# - FP_CLI_TEST_DBUSER is the user that the tests run under (defaults to "fp_cli_test").
+# - FP_CLI_TEST_DBPASS is the password to use for the above user (defaults to "password1").
 
 # POSIX compliant function to check if a string is numeric.
 is_numeric() {
@@ -23,10 +23,10 @@ NO_FORMAT="\033[0m"
 HOST=localhost
 PORT=""
 HOST_STRING=''
-if [ -n "${WP_CLI_TEST_DBHOST}" ]; then
-	case ${WP_CLI_TEST_DBHOST##*[]]} in
-		(*:*) HOST=${WP_CLI_TEST_DBHOST%:*} PORT=${WP_CLI_TEST_DBHOST##*:};;
-		(*)   HOST=${WP_CLI_TEST_DBHOST};;
+if [ -n "${FP_CLI_TEST_DBHOST}" ]; then
+	case ${FP_CLI_TEST_DBHOST##*[]]} in
+		(*:*) HOST=${FP_CLI_TEST_DBHOST%:*} PORT=${FP_CLI_TEST_DBHOST##*:};;
+		(*)   HOST=${FP_CLI_TEST_DBHOST};;
 	esac
 	HOST_STRING="-h${HOST}"
 	if [ -n "${PORT}" ]; then
@@ -46,41 +46,41 @@ else
 fi
 
 USER=root
-if [ -n "${WP_CLI_TEST_DBROOTUSER}" ]; then
-	echo "Connecting with custom root user: ${C_BLUE}${WP_CLI_TEST_DBROOTUSER}${NO_FORMAT}"
-	USER="${WP_CLI_TEST_DBROOTUSER}"
+if [ -n "${FP_CLI_TEST_DBROOTUSER}" ]; then
+	echo "Connecting with custom root user: ${C_BLUE}${FP_CLI_TEST_DBROOTUSER}${NO_FORMAT}"
+	USER="${FP_CLI_TEST_DBROOTUSER}"
 else
 	echo "Connecting with default root user: ${C_BLUE}${USER}${NO_FORMAT}"
 fi
 
 PASSWORD_STRING=""
-if [ -n "${WP_CLI_TEST_DBROOTPASS}" ]; then
-	echo "Connecting with custom root password: ${C_BLUE}${WP_CLI_TEST_DBROOTPASS}${NO_FORMAT}"
-	PASSWORD_STRING="-p${WP_CLI_TEST_DBROOTPASS}"
+if [ -n "${FP_CLI_TEST_DBROOTPASS}" ]; then
+	echo "Connecting with custom root password: ${C_BLUE}${FP_CLI_TEST_DBROOTPASS}${NO_FORMAT}"
+	PASSWORD_STRING="-p${FP_CLI_TEST_DBROOTPASS}"
 else
 	echo "Connecting with default root password: ${C_BLUE}empty${NO_FORMAT}"
 fi
 
-TEST_DB=wp_cli_test
-if [ -n "${WP_CLI_TEST_DBNAME}" ]; then
-	echo "Using custom test database: ${C_BLUE}${WP_CLI_TEST_DBNAME}${NO_FORMAT}"
-	TEST_DB="${WP_CLI_TEST_DBNAME}"
+TEST_DB=fp_cli_test
+if [ -n "${FP_CLI_TEST_DBNAME}" ]; then
+	echo "Using custom test database: ${C_BLUE}${FP_CLI_TEST_DBNAME}${NO_FORMAT}"
+	TEST_DB="${FP_CLI_TEST_DBNAME}"
 else
 	echo "Using default test database: ${C_BLUE}${TEST_DB}${NO_FORMAT}"
 fi
 
-TEST_USER=wp_cli_test
-if [ -n "${WP_CLI_TEST_DBUSER}" ]; then
-	echo "Using custom test user: ${C_BLUE}${WP_CLI_TEST_DBUSER}${NO_FORMAT}"
-	TEST_USER="${WP_CLI_TEST_DBUSER}"
+TEST_USER=fp_cli_test
+if [ -n "${FP_CLI_TEST_DBUSER}" ]; then
+	echo "Using custom test user: ${C_BLUE}${FP_CLI_TEST_DBUSER}${NO_FORMAT}"
+	TEST_USER="${FP_CLI_TEST_DBUSER}"
 else
 	echo "Using default test user: ${C_BLUE}${TEST_USER}${NO_FORMAT}"
 fi
 
 TEST_PASSWORD=password1
-if [ -n "${WP_CLI_TEST_DBPASS}" ]; then
-	echo "Using custom test password: ${C_BLUE}${WP_CLI_TEST_DBPASS}${NO_FORMAT}"
-	TEST_PASSWORD="${WP_CLI_TEST_DBPASS}"
+if [ -n "${FP_CLI_TEST_DBPASS}" ]; then
+	echo "Using custom test password: ${C_BLUE}${FP_CLI_TEST_DBPASS}${NO_FORMAT}"
+	TEST_PASSWORD="${FP_CLI_TEST_DBPASS}"
 else
 	echo "Using default test password: ${C_BLUE}${TEST_PASSWORD}${NO_FORMAT}"
 fi
@@ -131,7 +131,7 @@ if [ "${TYPE}" = "MySQL" ]; then
 		if [ $i -ge $MYSQL_TRIES ]; then
 			echo "${C_RED}MySQL failed to start. Aborting.${NO_FORMAT}"
 			echo "Cannot connect to MySQL server. For all available variables, check the documentation at:"
-			echo " ${C_BLUE}https://github.com/wp-cli/wp-cli-tests?tab=readme-ov-file#the-database-credentials${NO_FORMAT}"
+			echo " ${C_BLUE}https://github.com/fp-cli/fp-cli-tests?tab=readme-ov-file#the-database-credentials${NO_FORMAT}"
 			exit 1
 		fi
 	done
@@ -147,7 +147,7 @@ else
 		if [ $i -ge $MYSQL_TRIES ]; then
 			echo "${C_RED}MariaDB failed to start. Aborting.${NO_FORMAT}"
 			echo "Cannot connect to MariaDB server. For all available variables, check the documentation at:"
-			echo " ${C_BLUE}https://github.com/wp-cli/wp-cli-tests?tab=readme-ov-file#the-database-credentials${NO_FORMAT}"
+			echo " ${C_BLUE}https://github.com/fp-cli/fp-cli-tests?tab=readme-ov-file#the-database-credentials${NO_FORMAT}"
 			exit 1
 		fi
 	done

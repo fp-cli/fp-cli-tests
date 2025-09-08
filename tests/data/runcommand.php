@@ -1,36 +1,36 @@
 <?php
 
 /**
- * Test data for WPCliRuncommandDynamicReturnTypeExtension.
+ * Test data for FPCliRuncommandDynamicReturnTypeExtension.
  */
 
 declare(strict_types=1);
 
-namespace WP_CLI\Tests\Tests\PHPStan;
+namespace FP_CLI\Tests\Tests\PHPStan;
 
-use WP_CLI;
+use FP_CLI;
 use function PHPStan\Testing\assertType;
 
 
-$value = WP_CLI::runcommand( 'plugin list --format=json', [ 'return' => true ] );
+$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => true ] );
 assertType( 'string', $value );
 
-$value = WP_CLI::runcommand( 'plugin list --format=json', [ 'return' => false ] );
+$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => false ] );
 assertType( 'null', $value );
 
-$value = WP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'all' ] );
+$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'all' ] );
 assertType( 'object{stdout: string, stderr: string, return_code: int}', $value );
 
-$value = WP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stdout' ] );
+$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stdout' ] );
 assertType( 'string', $value );
 
-$value = WP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stderr' ] );
+$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stderr' ] );
 assertType( 'string', $value );
 
-$value = WP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'return_code' ] );
+$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'return_code' ] );
 assertType( 'int', $value );
 
-$value = WP_CLI::runcommand(
+$value = FP_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return' => true,
@@ -39,7 +39,7 @@ $value = WP_CLI::runcommand(
 );
 assertType( 'array|null', $value );
 
-$value = WP_CLI::runcommand(
+$value = FP_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return' => 'stdout',
@@ -48,7 +48,7 @@ $value = WP_CLI::runcommand(
 );
 assertType( 'array|null', $value );
 
-$value = WP_CLI::runcommand(
+$value = FP_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return'     => 'stdout',
@@ -57,7 +57,7 @@ $value = WP_CLI::runcommand(
 );
 assertType( 'string', $value );
 
-$value = WP_CLI::runcommand(
+$value = FP_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return'     => 'stdout',

@@ -1,22 +1,22 @@
 <?php
 /**
- * Polyfills used by Behat to support multiple versions of WP.
+ * Polyfills used by Behat to support multiple versions of FP.
  *
- * This file will get installed as a must-use plugin in WP installs that are run
+ * This file will get installed as a must-use plugin in FP installs that are run
  * by the functional tests.
  */
 
 /*
  * Add a polyfill for the get_theme_file_uri(), as it is required for the
  * TwentyTwenty theme's starter content, and will fatal the site if you install
- * WP 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
- * to a version of WP lower than 4.7.
+ * FP 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
+ * to a version of FP lower than 4.7.
  *
  * Note: This is a quick fix, and a cleaner solution would be to change the
  * active theme on downgrading, if the current theme declares it is not
  * supported.
  *
- * See: https://github.com/WordPress/twentytwenty/issues/973
+ * See: https://github.com/FinPress/twentytwenty/issues/973
  */
 if ( ! function_exists( 'get_theme_file_uri' ) ) {
 	/**
@@ -56,14 +56,14 @@ if ( ! function_exists( 'get_theme_file_uri' ) ) {
 /*
  * Add a polyfill for the is_customize_preview(), as it is required for the
  * TwentyTwenty theme's starter content, and will fatal the site if you install
- * WP 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
- * to a version of WP lower than 4.0.
+ * FP 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
+ * to a version of FP lower than 4.0.
  *
  * Note: This is a quick fix, and a cleaner solution would be to change the
  * active theme on downgrading, if the current theme declares it is not
  * supported.
  *
- * See: https://github.com/WordPress/twentytwenty/issues/973
+ * See: https://github.com/FinPress/twentytwenty/issues/973
  */
 if ( ! function_exists( 'is_customize_preview' ) ) {
 	/**
@@ -71,7 +71,7 @@ if ( ! function_exists( 'is_customize_preview' ) ) {
 	 *
 	 * @since 4.0.0
 	 *
-	 * @global WP_Customize_Manager $wp_customize Customizer instance.
+	 * @global FP_Customize_Manager $fp_customize Customizer instance.
 	 *
 	 * @return bool True if the site is being previewed in the Customizer, false otherwise.
 	 */

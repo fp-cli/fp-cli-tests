@@ -1,6 +1,6 @@
 <?php
 
-namespace WP_CLI\Tests\Context;
+namespace FP_CLI\Tests\Context;
 
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\EventDispatcher\Event\OutlineTested;
@@ -21,12 +21,12 @@ use SebastianBergmann\CodeCoverage\Filter;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\Environment\Runtime;
 use RuntimeException;
-use WP_CLI;
+use FP_CLI;
 use DirectoryIterator;
-use WP_CLI\Process;
-use WP_CLI\ProcessRun;
-use WP_CLI\Utils;
-use WP_CLI\WpOrgApi;
+use FP_CLI\Process;
+use FP_CLI\ProcessRun;
+use FP_CLI\Utils;
+use FP_CLI\WpOrgApi;
 
 /**
  * Features context.
@@ -54,7 +54,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	protected $email_sends;
 
 	/**
-	 * The current working directory for scenarios that have a "Given a WP installation" or "Given an empty directory" step. Variable RUN_DIR. Lives until the end of the scenario.
+	 * The current working directory for scenarios that have a "Given a FP installation" or "Given an empty directory" step. Variable RUN_DIR. Lives until the end of the scenario.
 	 *
 	 * @var ?string
 	 */
@@ -68,28 +68,28 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $behat_run_dir;
 
 	/**
-	 * Where WordPress core is downloaded to for caching, and which is copied to RUN_DIR during a "Given a WP installation" step. Lives until manually deleted.
+	 * Where FinPress core is downloaded to for caching, and which is copied to RUN_DIR during a "Given a FP installation" step. Lives until manually deleted.
 	 *
 	 * @var string
 	 */
 	private static $cache_dir;
 
 	/**
-	 * The directory that holds the install cache, and which is copied to RUN_DIR during a "Given a WP installation" step. Recreated on each suite run.
+	 * The directory that holds the install cache, and which is copied to RUN_DIR during a "Given a FP installation" step. Recreated on each suite run.
 	 *
 	 * @var string
 	 */
 	private static $install_cache_dir;
 
 	/**
-	 * The directory that holds a copy of the sqlite-database-integration plugin, and which is copied to RUN_DIR during a "Given a WP installation" step. Lives until manually deleted.
+	 * The directory that holds a copy of the sqlite-database-integration plugin, and which is copied to RUN_DIR during a "Given a FP installation" step. Lives until manually deleted.
 	 *
 	 * @var ?string
 	 */
 	private static $sqlite_cache_dir;
 
 	/**
-	 * The directory that the WP-CLI cache (WP_CLI_CACHE_DIR, normally "$HOME/.wp-cli/cache") is set to on a "Given an empty cache" step.
+	 * The directory that the FP-CLI cache (FP_CLI_CACHE_DIR, normally "$HOME/.fp-cli/cache") is set to on a "Given an empty cache" step.
 	 * Variable SUITE_CACHE_DIR. Lives until the end of the scenario (or until another "Given an empty cache" step within the scenario).
 	 *
 	 * @var ?string
@@ -97,7 +97,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $suite_cache_dir;
 
 	/**
-	 * Where the current WP-CLI source repository is copied to for Composer-based tests with a "Given a dependency on current wp-cli" step.
+	 * Where the current FP-CLI source repository is copied to for Composer-based tests with a "Given a dependency on current fp-cli" step.
 	 * Variable COMPOSER_LOCAL_REPOSITORY. Lives until the end of the suite.
 	 *
 	 * @var ?string
@@ -105,19 +105,19 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $composer_local_repository;
 
 	/**
-	 * The test database settings. All but `dbname` can be set via environment variables. The database is dropped at the start of each scenario and created on a "Given a WP installation" step.
+	 * The test database settings. All but `dbname` can be set via environment variables. The database is dropped at the start of each scenario and created on a "Given a FP installation" step.
 	 *
 	 * @var array<string, string>
 	 */
 	private static $db_settings = [
-		'dbname' => 'wp_cli_test',
-		'dbuser' => 'wp_cli_test',
+		'dbname' => 'fp_cli_test',
+		'dbuser' => 'fp_cli_test',
 		'dbpass' => 'password1',
 		'dbhost' => '127.0.0.1',
 	];
 
 	/**
-	 *  What type of database should WordPress use for the test installations. Default to MySQL
+	 *  What type of database should FinPress use for the test installations. Default to MySQL
 	 *
 	 * @var string
 	 */
@@ -138,8 +138,8 @@ class FeatureContext implements SnippetAcceptingContext {
 	private $running_procs = [];
 
 	/**
-	 * Array of variables available as {VARIABLE_NAME}. Some are always set: CORE_CONFIG_SETTINGS, DB_USER, DB_PASSWORD, DB_HOST, SRC_DIR, CACHE_DIR, WP_VERSION-version-latest.
-	 * Some are step-dependent: RUN_DIR, SUITE_CACHE_DIR, COMPOSER_LOCAL_REPOSITORY, PHAR_PATH. One is set on use: INVOKE_WP_CLI_WITH_PHP_ARGS-args.
+	 * Array of variables available as {VARIABLE_NAME}. Some are always set: CORE_CONFIG_SETTINGS, DB_USER, DB_PASSWORD, DB_HOST, SRC_DIR, CACHE_DIR, FP_VERSION-version-latest.
+	 * Some are step-dependent: RUN_DIR, SUITE_CACHE_DIR, COMPOSER_LOCAL_REPOSITORY, PHAR_PATH. One is set on use: INVOKE_FP_CLI_WITH_PHP_ARGS-args.
 	 * Scenarios can define their own variables using "Given save" steps. Variables are reset for each scenario.
 	 *
 	 * @var array<string, string>
@@ -154,7 +154,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $temp_dir_infix;
 
 	/**
-	 * Whether to log run times - WP_CLI_TEST_LOG_RUN_TIMES env var. Set on `@BeforeScenario'.
+	 * Whether to log run times - FP_CLI_TEST_LOG_RUN_TIMES env var. Set on `@BeforeScenario'.
 	 *
 	 * @var false|string
 	 */
@@ -277,7 +277,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * @return bool
 	 */
 	private static function running_with_code_coverage() {
-		$with_code_coverage = (string) getenv( 'WP_CLI_TEST_COVERAGE' );
+		$with_code_coverage = (string) getenv( 'FP_CLI_TEST_COVERAGE' );
 
 		return \in_array( $with_code_coverage, [ 'true', '1' ], true );
 	}
@@ -323,11 +323,11 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		// We try to detect the vendor folder in the most probable locations.
 		$vendor_locations = [
-			// wp-cli/wp-cli-tests is a dependency of the current working dir.
+			// fp-cli/fp-cli-tests is a dependency of the current working dir.
 			getcwd() . '/vendor',
-			// wp-cli/wp-cli-tests is the root project.
+			// fp-cli/fp-cli-tests is the root project.
 			dirname( __DIR__, 2 ) . '/vendor',
-			// wp-cli/wp-cli-tests is a dependency.
+			// fp-cli/fp-cli-tests is a dependency.
 			dirname( __DIR__, 4 ),
 		];
 
@@ -347,9 +347,9 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Get the path to the WP-CLI framework folder.
+	 * Get the path to the FP-CLI framework folder.
 	 *
-	 * @return string Absolute path to the WP-CLI framework folder.
+	 * @return string Absolute path to the FP-CLI framework folder.
 	 */
 	public static function get_framework_dir(): ?string {
 		static $framework_folder = null;
@@ -360,12 +360,12 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		$vendor_folder = self::get_vendor_dir();
 
-		// Now we need to detect the location of wp-cli/wp-cli package.
+		// Now we need to detect the location of fp-cli/fp-cli package.
 		$framework_locations = [
-			// wp-cli/wp-cli is the root project.
+			// fp-cli/fp-cli is the root project.
 			dirname( $vendor_folder ),
-			// wp-cli/wp-cli is a dependency.
-			"{$vendor_folder}/wp-cli/wp-cli",
+			// fp-cli/fp-cli is a dependency.
+			"{$vendor_folder}/fp-cli/fp-cli",
 		];
 
 		$framework_folder = '';
@@ -384,9 +384,9 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Get the path to the WP-CLI binary.
+	 * Get the path to the FP-CLI binary.
 	 *
-	 * @return string Absolute path to the WP-CLI binary.
+	 * @return string Absolute path to the FP-CLI binary.
 	 */
 	public static function get_bin_path(): ?string {
 		static $bin_path = null;
@@ -395,7 +395,7 @@ class FeatureContext implements SnippetAcceptingContext {
 			return $bin_path;
 		}
 
-		$bin_path = getenv( 'WP_CLI_BIN_DIR' );
+		$bin_path = getenv( 'FP_CLI_BIN_DIR' );
 
 		if ( ! empty( $bin_path ) ) {
 			return $bin_path;
@@ -407,7 +407,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		];
 
 		foreach ( $bin_paths as $path ) {
-			if ( is_file( "{$path}/wp" ) && is_executable( "{$path}/wp" ) ) {
+			if ( is_file( "{$path}/fp" ) && is_executable( "{$path}/fp" ) ) {
 				$bin_path = $path;
 				break;
 			}
@@ -417,7 +417,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Get the environment variables required for launched `wp` processes.
+	 * Get the environment variables required for launched `fp` processes.
 	 *
 	 * @return array<string, string|int>
 	 */
@@ -428,23 +428,23 @@ class FeatureContext implements SnippetAcceptingContext {
 			return $env;
 		}
 
-		// Ensure we're using the expected `wp` binary.
+		// Ensure we're using the expected `fp` binary.
 		$bin_path = self::get_bin_path();
-		wp_cli_behat_env_debug( "WP-CLI binary path: {$bin_path}" );
+		fp_cli_behat_env_debug( "FP-CLI binary path: {$bin_path}" );
 
-		if ( ! file_exists( "{$bin_path}/wp" ) ) {
-			wp_cli_behat_env_debug( "WARNING: No file named 'wp' found in the provided/detected binary path." );
+		if ( ! file_exists( "{$bin_path}/fp" ) ) {
+			fp_cli_behat_env_debug( "WARNING: No file named 'fp' found in the provided/detected binary path." );
 		}
 
-		if ( ! is_executable( "{$bin_path}/wp" ) ) {
-			wp_cli_behat_env_debug( "WARNING: File named 'wp' found in the provided/detected binary path is not executable." );
+		if ( ! is_executable( "{$bin_path}/fp" ) ) {
+			fp_cli_behat_env_debug( "WARNING: File named 'fp' found in the provided/detected binary path is not executable." );
 		}
 
 		$path_separator = Utils\is_windows() ? ';' : ':';
 		$env            = [
 			'PATH'         => $bin_path . $path_separator . getenv( 'PATH' ),
 			'BEHAT_RUN'    => 1,
-			'HOME'         => sys_get_temp_dir() . '/wp-cli-home',
+			'HOME'         => sys_get_temp_dir() . '/fp-cli-home',
 			'TEST_RUN_DIR' => self::$behat_run_dir,
 		];
 
@@ -455,25 +455,25 @@ class FeatureContext implements SnippetAcceptingContext {
 				throw new RuntimeException( 'No coverage driver available. Re-run script with `--xdebug` flag, i.e. `composer behat -- --xdebug`.' );
 			}
 
-			$coverage_require_file = self::$behat_run_dir . '/vendor/wp-cli/wp-cli-tests/utils/generate-coverage.php';
+			$coverage_require_file = self::$behat_run_dir . '/vendor/fp-cli/fp-cli-tests/utils/generate-coverage.php';
 			if ( ! file_exists( $coverage_require_file ) ) {
-				// This file is not vendored inside the wp-cli-tests project
+				// This file is not vendored inside the fp-cli-tests project
 				$coverage_require_file = self::$behat_run_dir . '/utils/generate-coverage.php';
 			}
 
-			$current               = getenv( 'WP_CLI_REQUIRE' );
+			$current               = getenv( 'FP_CLI_REQUIRE' );
 			$updated               = $current ? "{$current},{$coverage_require_file}" : $coverage_require_file;
-			$env['WP_CLI_REQUIRE'] = $updated;
+			$env['FP_CLI_REQUIRE'] = $updated;
 		}
 
-		$config_path = getenv( 'WP_CLI_CONFIG_PATH' );
+		$config_path = getenv( 'FP_CLI_CONFIG_PATH' );
 		if ( false !== $config_path ) {
-			$env['WP_CLI_CONFIG_PATH'] = $config_path;
+			$env['FP_CLI_CONFIG_PATH'] = $config_path;
 		}
 
-		$allow_root = getenv( 'WP_CLI_ALLOW_ROOT' );
+		$allow_root = getenv( 'FP_CLI_ALLOW_ROOT' );
 		if ( false !== $allow_root ) {
-			$env['WP_CLI_ALLOW_ROOT'] = $allow_root;
+			$env['FP_CLI_ALLOW_ROOT'] = $allow_root;
 		}
 
 		$term = getenv( 'TERM' );
@@ -481,19 +481,19 @@ class FeatureContext implements SnippetAcceptingContext {
 			$env['TERM'] = $term;
 		}
 
-		$php_args = getenv( 'WP_CLI_PHP_ARGS' );
+		$php_args = getenv( 'FP_CLI_PHP_ARGS' );
 		if ( false !== $php_args ) {
-			$env['WP_CLI_PHP_ARGS'] = $php_args;
+			$env['FP_CLI_PHP_ARGS'] = $php_args;
 		}
 
-		$php_used = getenv( 'WP_CLI_PHP_USED' );
+		$php_used = getenv( 'FP_CLI_PHP_USED' );
 		if ( false !== $php_used ) {
-			$env['WP_CLI_PHP_USED'] = $php_used;
+			$env['FP_CLI_PHP_USED'] = $php_used;
 		}
 
-		$php = getenv( 'WP_CLI_PHP' );
+		$php = getenv( 'FP_CLI_PHP' );
 		if ( false !== $php ) {
-			$env['WP_CLI_PHP'] = $php;
+			$env['FP_CLI_PHP'] = $php;
 		}
 
 		$travis_build_dir = getenv( 'TRAVIS_BUILD_DIR' );
@@ -502,9 +502,9 @@ class FeatureContext implements SnippetAcceptingContext {
 		}
 
 		// Dump environment for debugging purposes, but before adding the GitHub token.
-		wp_cli_behat_env_debug( 'Environment:' );
+		fp_cli_behat_env_debug( 'Environment:' );
 		foreach ( $env as $key => $value ) {
-			wp_cli_behat_env_debug( "   [{$key}] => {$value}" );
+			fp_cli_behat_env_debug( "   [{$key}] => {$value}" );
 		}
 
 		$github_token = getenv( 'GITHUB_TOKEN' );
@@ -529,9 +529,9 @@ class FeatureContext implements SnippetAcceptingContext {
 		}
 
 		$paths = [
-			dirname( __DIR__, 4 ) . '/wp-cli/wp-cli/VERSION',
+			dirname( __DIR__, 4 ) . '/fp-cli/fp-cli/VERSION',
 			dirname( __DIR__, 5 ) . '/VERSION',
-			dirname( __DIR__, 2 ) . '/vendor/wp-cli/wp-cli/VERSION',
+			dirname( __DIR__, 2 ) . '/vendor/fp-cli/fp-cli/VERSION',
 		];
 
 		$framework_root = dirname( __DIR__, 2 );
@@ -553,12 +553,12 @@ class FeatureContext implements SnippetAcceptingContext {
 
 	/**
 	 * Download and extract a single copy of the sqlite-database-integration plugin
-	 * for use in subsequent WordPress copies
+	 * for use in subsequent FinPress copies
 	 *
 	 * @param string $dir
 	 */
 	private static function download_sqlite_plugin( $dir ): void {
-		$download_url      = 'https://downloads.wordpress.org/plugin/sqlite-database-integration.zip';
+		$download_url      = 'https://downloads.finpress.org/plugin/sqlite-database-integration.zip';
 		$download_location = $dir . '/sqlite-database-integration.zip';
 
 		if ( ! is_dir( $dir ) ) {
@@ -591,16 +591,16 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Given a WordPress installation with the sqlite-database-integration plugin,
+	 * Given a FinPress installation with the sqlite-database-integration plugin,
 	 * configure it to use SQLite as the database by placing the db.php dropin file
 	 *
 	 * @param string $dir
 	 */
 	private static function configure_sqlite( $dir ): void {
-		$db_copy   = $dir . '/wp-content/mu-plugins/sqlite-database-integration/db.copy';
-		$db_dropin = $dir . '/wp-content/db.php';
+		$db_copy   = $dir . '/fp-content/mu-plugins/sqlite-database-integration/db.copy';
+		$db_dropin = $dir . '/fp-content/db.php';
 
-		/* similar to https://github.com/WordPress/sqlite-database-integration/blob/3306576c9b606bc23bbb26c15383fef08e03ab11/activate.php#L95 */
+		/* similar to https://github.com/FinPress/sqlite-database-integration/blob/3306576c9b606bc23bbb26c15383fef08e03ab11/activate.php#L95 */
 		$file_contents = str_replace(
 			array(
 				'\'{SQLITE_IMPLEMENTATION_FOLDER_PATH}\'',
@@ -619,28 +619,28 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * We cache the results of `wp core download` to improve test performance.
+	 * We cache the results of `fp core download` to improve test performance.
 	 * Ideally, we'd cache at the HTTP layer for more reliable tests.
 	 */
-	private static function cache_wp_files(): void {
-		$wp_version             = getenv( 'WP_VERSION' );
-		$wp_version_suffix      = ( false !== $wp_version ) ? "-$wp_version" : '';
-		self::$cache_dir        = sys_get_temp_dir() . '/wp-cli-test-core-download-cache' . $wp_version_suffix;
-		self::$sqlite_cache_dir = sys_get_temp_dir() . '/wp-cli-test-sqlite-integration-cache';
+	private static function cache_fp_files(): void {
+		$fp_version             = getenv( 'FP_VERSION' );
+		$fp_version_suffix      = ( false !== $fp_version ) ? "-$fp_version" : '';
+		self::$cache_dir        = sys_get_temp_dir() . '/fp-cli-test-core-download-cache' . $fp_version_suffix;
+		self::$sqlite_cache_dir = sys_get_temp_dir() . '/fp-cli-test-sqlite-integration-cache';
 
-		if ( 'sqlite' === getenv( 'WP_CLI_TEST_DBTYPE' ) ) {
+		if ( 'sqlite' === getenv( 'FP_CLI_TEST_DBTYPE' ) ) {
 			if ( ! is_readable( self::$sqlite_cache_dir . '/sqlite-database-integration/db.copy' ) ) {
 				self::download_sqlite_plugin( self::$sqlite_cache_dir );
 			}
 		}
 
-		if ( is_readable( self::$cache_dir . '/wp-config-sample.php' ) ) {
+		if ( is_readable( self::$cache_dir . '/fp-config-sample.php' ) ) {
 			return;
 		}
 
-		$cmd = Utils\esc_cmd( 'wp core download --force --path=%s', self::$cache_dir );
-		if ( $wp_version ) {
-			$cmd .= Utils\esc_cmd( ' --version=%s', $wp_version );
+		$cmd = Utils\esc_cmd( 'fp core download --force --path=%s', self::$cache_dir );
+		if ( $fp_version ) {
+			$cmd .= Utils\esc_cmd( ' --version=%s', $fp_version );
 		}
 		Process::create( $cmd, null, self::get_process_env_variables() )->run_check();
 	}
@@ -650,33 +650,33 @@ class FeatureContext implements SnippetAcceptingContext {
 	 */
 	public static function prepare( BeforeSuiteScope $scope ): void {
 		// Test performance statistics - useful for detecting slow tests.
-		self::$log_run_times = getenv( 'WP_CLI_TEST_LOG_RUN_TIMES' );
+		self::$log_run_times = getenv( 'FP_CLI_TEST_LOG_RUN_TIMES' );
 		if ( false !== self::$log_run_times ) {
 			self::log_run_times_before_suite( $scope );
 		}
 		self::$behat_run_dir = getcwd();
 		self::$mysql_binary  = Utils\get_mysql_binary_path();
 
-		$result = Process::create( 'wp cli info', null, self::get_process_env_variables() )->run_check();
+		$result = Process::create( 'fp cli info', null, self::get_process_env_variables() )->run_check();
 		echo "{$result->stdout}\n";
 
-		self::cache_wp_files();
+		self::cache_fp_files();
 
-		$result = Process::create( Utils\esc_cmd( 'wp core version --debug --path=%s', self::$cache_dir ), null, self::get_process_env_variables() )->run_check();
+		$result = Process::create( Utils\esc_cmd( 'fp core version --debug --path=%s', self::$cache_dir ), null, self::get_process_env_variables() )->run_check();
 		echo "[Debug messages]\n";
 		echo "{$result->stderr}\n";
 
-		echo "WordPress {$result->stdout}\n";
+		echo "FinPress {$result->stdout}\n";
 
 		// Remove install cache if any (not setting the static var).
-		$wp_version        = getenv( 'WP_VERSION' );
-		$wp_version_suffix = ( false !== $wp_version ) ? "-$wp_version" : '';
-		$install_cache_dir = sys_get_temp_dir() . '/wp-cli-test-core-install-cache' . $wp_version_suffix;
+		$fp_version        = getenv( 'FP_VERSION' );
+		$fp_version_suffix = ( false !== $fp_version ) ? "-$fp_version" : '';
+		$install_cache_dir = sys_get_temp_dir() . '/fp-cli-test-core-install-cache' . $fp_version_suffix;
 		if ( file_exists( $install_cache_dir ) ) {
 			self::remove_dir( $install_cache_dir );
 		}
 
-		if ( getenv( 'WP_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
+		if ( getenv( 'FP_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
 			exit;
 		}
 	}
@@ -727,14 +727,14 @@ class FeatureContext implements SnippetAcceptingContext {
 	public function afterScenario( AfterScenarioScope $scope ): void {
 
 		if ( self::$run_dir ) {
-			// Remove altered WP install, unless there's an error.
+			// Remove altered FP install, unless there's an error.
 			if ( $scope->getTestResult()->getResultCode() <= 10 ) {
 				self::remove_dir( self::$run_dir );
 			}
 			self::$run_dir = null;
 		}
 
-		// Remove WP-CLI package directory if any. Set to `wp package path` by package-command and scaffold-package-command features, and by cli-info.feature.
+		// Remove FP-CLI package directory if any. Set to `fp package path` by package-command and scaffold-package-command features, and by cli-info.feature.
 		if ( isset( $this->variables['PACKAGE_PATH'] ) ) {
 			self::remove_dir( $this->variables['PACKAGE_PATH'] );
 		}
@@ -747,8 +747,8 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		// Remove global config file if any.
 		$env = self::get_process_env_variables();
-		if ( isset( $env['HOME'] ) && file_exists( "{$env['HOME']}/.wp-cli/config.yml" ) ) {
-			unlink( "{$env['HOME']}/.wp-cli/config.yml" );
+		if ( isset( $env['HOME'] ) && file_exists( "{$env['HOME']}/.fp-cli/config.yml" ) ) {
+			unlink( "{$env['HOME']}/.fp-cli/config.yml" );
 		}
 
 		// Remove any background processes.
@@ -792,13 +792,13 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Create a temporary WP_CLI_CACHE_DIR. Exposed as SUITE_CACHE_DIR in "Given an empty cache" step.
+	 * Create a temporary FP_CLI_CACHE_DIR. Exposed as SUITE_CACHE_DIR in "Given an empty cache" step.
 	 */
 	public static function create_cache_dir(): string {
 		if ( self::$suite_cache_dir ) {
 			self::remove_dir( self::$suite_cache_dir );
 		}
-		self::$suite_cache_dir = sys_get_temp_dir() . '/' . uniqid( 'wp-cli-test-suite-cache-' . self::$temp_dir_infix . '-', true );
+		self::$suite_cache_dir = sys_get_temp_dir() . '/' . uniqid( 'fp-cli-test-suite-cache-' . self::$temp_dir_infix . '-', true );
 		mkdir( self::$suite_cache_dir );
 		return self::$suite_cache_dir;
 	}
@@ -808,40 +808,40 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * Every scenario gets its own context object.
 	 */
 	public function __construct() {
-		if ( getenv( 'WP_CLI_TEST_DBROOTUSER' ) ) {
-			$this->variables['DB_ROOT_USER'] = getenv( 'WP_CLI_TEST_DBROOTUSER' );
+		if ( getenv( 'FP_CLI_TEST_DBROOTUSER' ) ) {
+			$this->variables['DB_ROOT_USER'] = getenv( 'FP_CLI_TEST_DBROOTUSER' );
 		}
 
-		if ( false !== getenv( 'WP_CLI_TEST_DBROOTPASS' ) ) {
-			$this->variables['DB_ROOT_PASSWORD'] = getenv( 'WP_CLI_TEST_DBROOTPASS' );
+		if ( false !== getenv( 'FP_CLI_TEST_DBROOTPASS' ) ) {
+			$this->variables['DB_ROOT_PASSWORD'] = getenv( 'FP_CLI_TEST_DBROOTPASS' );
 		}
 
-		if ( getenv( 'WP_CLI_TEST_DBNAME' ) ) {
-			$this->variables['DB_NAME'] = getenv( 'WP_CLI_TEST_DBNAME' );
+		if ( getenv( 'FP_CLI_TEST_DBNAME' ) ) {
+			$this->variables['DB_NAME'] = getenv( 'FP_CLI_TEST_DBNAME' );
 		} else {
-			$this->variables['DB_NAME'] = 'wp_cli_test';
+			$this->variables['DB_NAME'] = 'fp_cli_test';
 		}
 
-		if ( getenv( 'WP_CLI_TEST_DBUSER' ) ) {
-			$this->variables['DB_USER'] = getenv( 'WP_CLI_TEST_DBUSER' );
+		if ( getenv( 'FP_CLI_TEST_DBUSER' ) ) {
+			$this->variables['DB_USER'] = getenv( 'FP_CLI_TEST_DBUSER' );
 		} else {
-			$this->variables['DB_USER'] = 'wp_cli_test';
+			$this->variables['DB_USER'] = 'fp_cli_test';
 		}
 
-		if ( false !== getenv( 'WP_CLI_TEST_DBPASS' ) ) {
-			$this->variables['DB_PASSWORD'] = getenv( 'WP_CLI_TEST_DBPASS' );
+		if ( false !== getenv( 'FP_CLI_TEST_DBPASS' ) ) {
+			$this->variables['DB_PASSWORD'] = getenv( 'FP_CLI_TEST_DBPASS' );
 		} else {
 			$this->variables['DB_PASSWORD'] = 'password1';
 		}
 
-		if ( getenv( 'WP_CLI_TEST_DBHOST' ) ) {
-			$this->variables['DB_HOST'] = getenv( 'WP_CLI_TEST_DBHOST' );
+		if ( getenv( 'FP_CLI_TEST_DBHOST' ) ) {
+			$this->variables['DB_HOST'] = getenv( 'FP_CLI_TEST_DBHOST' );
 		} else {
 			$this->variables['DB_HOST'] = 'localhost';
 		}
 
-		if ( getenv( 'WP_CLI_TEST_DBTYPE' ) ) {
-			$this->variables['DB_TYPE'] = getenv( 'WP_CLI_TEST_DBTYPE' );
+		if ( getenv( 'FP_CLI_TEST_DBTYPE' ) ) {
+			$this->variables['DB_TYPE'] = getenv( 'FP_CLI_TEST_DBTYPE' );
 		} else {
 			$this->variables['DB_TYPE'] = 'mysql';
 		}
@@ -854,8 +854,8 @@ class FeatureContext implements SnippetAcceptingContext {
 			$this->variables['MYSQL_HOST'] = getenv( 'MYSQL_HOST' );
 		}
 
-		if ( getenv( 'WP_CLI_TEST_DBSOCKET' ) ) {
-			$this->variables['DB_SOCKET'] = getenv( 'WP_CLI_TEST_DBSOCKET' );
+		if ( getenv( 'FP_CLI_TEST_DBSOCKET' ) ) {
+			$this->variables['DB_SOCKET'] = getenv( 'FP_CLI_TEST_DBSOCKET' );
 		}
 
 		self::$db_settings['dbname'] = $this->variables['DB_NAME'];
@@ -873,57 +873,57 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Replace standard {VARIABLE_NAME} variables and the special {INVOKE_WP_CLI_WITH_PHP_ARGS-args} and {WP_VERSION-version-latest} variables.
+	 * Replace standard {VARIABLE_NAME} variables and the special {INVOKE_FP_CLI_WITH_PHP_ARGS-args} and {FP_VERSION-version-latest} variables.
 	 * Note that standard variable names can only contain uppercase letters, digits and underscores and cannot begin with a digit.
 	 *
 	 * @param string $str
 	 * @return string
 	 */
 	public function replace_variables( $str ) {
-		if ( false !== strpos( $str, '{INVOKE_WP_CLI_WITH_PHP_ARGS-' ) ) {
-			$str = $this->replace_invoke_wp_cli_with_php_args( $str );
+		if ( false !== strpos( $str, '{INVOKE_FP_CLI_WITH_PHP_ARGS-' ) ) {
+			$str = $this->replace_invoke_fp_cli_with_php_args( $str );
 		}
 		$str = preg_replace_callback( '/\{([A-Z_][A-Z_0-9]*)\}/', [ $this, 'replace_var' ], $str );
-		if ( false !== strpos( $str, '{WP_VERSION-' ) ) {
-			$str = $this->replace_wp_versions( $str );
+		if ( false !== strpos( $str, '{FP_VERSION-' ) ) {
+			$str = $this->replace_fp_versions( $str );
 		}
 		return $str;
 	}
 
 	/**
-	 * Substitute {INVOKE_WP_CLI_WITH_PHP_ARGS-args} variables.
+	 * Substitute {INVOKE_FP_CLI_WITH_PHP_ARGS-args} variables.
 	 *
 	 * @param string $str
 	 * @return string
 	 */
-	private function replace_invoke_wp_cli_with_php_args( $str ) {
+	private function replace_invoke_fp_cli_with_php_args( $str ) {
 		static $phar_path = null, $shell_path = null;
 
 		if ( null === $phar_path ) {
 			$phar_path      = false;
 			$phar_begin     = '#!/usr/bin/env php';
 			$phar_begin_len = strlen( $phar_begin );
-			$bin_dir        = getenv( 'WP_CLI_BIN_DIR' );
-			if ( false !== $bin_dir && file_exists( $bin_dir . '/wp' ) && file_get_contents( $bin_dir . '/wp', false, null, 0, $phar_begin_len ) === $phar_begin ) {
-				$phar_path = $bin_dir . '/wp';
+			$bin_dir        = getenv( 'FP_CLI_BIN_DIR' );
+			if ( false !== $bin_dir && file_exists( $bin_dir . '/fp' ) && file_get_contents( $bin_dir . '/fp', false, null, 0, $phar_begin_len ) === $phar_begin ) {
+				$phar_path = $bin_dir . '/fp';
 			} else {
 				$src_dir         = dirname( __DIR__, 2 );
-				$bin_path        = $src_dir . '/bin/wp';
-				$vendor_bin_path = $src_dir . '/vendor/bin/wp';
+				$bin_path        = $src_dir . '/bin/fp';
+				$vendor_bin_path = $src_dir . '/vendor/bin/fp';
 				if ( file_exists( $bin_path ) && is_executable( $bin_path ) ) {
 					$shell_path = $bin_path;
 				} elseif ( file_exists( $vendor_bin_path ) && is_executable( $vendor_bin_path ) ) {
 					$shell_path = $vendor_bin_path;
 				} else {
-					$shell_path = 'wp';
+					$shell_path = 'fp';
 				}
 			}
 		}
 
 		$str = preg_replace_callback(
-			'/{INVOKE_WP_CLI_WITH_PHP_ARGS-([^}]*)}/',
+			'/{INVOKE_FP_CLI_WITH_PHP_ARGS-([^}]*)}/',
 			static function ( $matches ) use ( $phar_path, $shell_path ) {
-				return $phar_path ? "php {$matches[1]} {$phar_path}" : ( 'WP_CLI_PHP_ARGS=' . escapeshellarg( $matches[1] ) . ' ' . $shell_path );
+				return $phar_path ? "php {$matches[1]} {$phar_path}" : ( 'FP_CLI_PHP_ARGS=' . escapeshellarg( $matches[1] ) . ' ' . $shell_path );
 			},
 			$str
 		);
@@ -952,39 +952,39 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Substitute {WP_VERSION-version-latest} variables.
+	 * Substitute {FP_VERSION-version-latest} variables.
 	 *
 	 * @param string $str
 	 * @return string
 	 */
-	private function replace_wp_versions( $str ): string {
-		static $wp_versions = null;
-		if ( null === $wp_versions ) {
-			$wp_versions = [];
+	private function replace_fp_versions( $str ): string {
+		static $fp_versions = null;
+		if ( null === $fp_versions ) {
+			$fp_versions = [];
 
-			$wp_org_api = new WpOrgApi();
-			$result     = $wp_org_api->get_core_version_check();
+			$fp_org_api = new WpOrgApi();
+			$result     = $fp_org_api->get_core_version_check();
 
 			if ( is_array( $result ) && ! empty( $result['offers'] ) ) {
 				// Latest version alias.
-				$wp_versions['{WP_VERSION-latest}'] = count( $result['offers'] ) ? $result['offers'][0]['version'] : '';
+				$fp_versions['{FP_VERSION-latest}'] = count( $result['offers'] ) ? $result['offers'][0]['version'] : '';
 				foreach ( $result['offers'] as $offer ) {
 					$sub_ver     = preg_replace( '/(^[0-9]+\.[0-9]+)\.[0-9]+$/', '$1', $offer['version'] );
-					$sub_ver_key = "{WP_VERSION-{$sub_ver}-latest}";
+					$sub_ver_key = "{FP_VERSION-{$sub_ver}-latest}";
 
 					$main_ver     = preg_replace( '/(^[0-9]+)\.[0-9]+$/', '$1', $sub_ver );
-					$main_ver_key = "{WP_VERSION-{$main_ver}-latest}";
+					$main_ver_key = "{FP_VERSION-{$main_ver}-latest}";
 
-					if ( ! isset( $wp_versions[ $main_ver_key ] ) ) {
-						$wp_versions[ $main_ver_key ] = $offer['version'];
+					if ( ! isset( $fp_versions[ $main_ver_key ] ) ) {
+						$fp_versions[ $main_ver_key ] = $offer['version'];
 					}
-					if ( ! isset( $wp_versions[ $sub_ver_key ] ) ) {
-						$wp_versions[ $sub_ver_key ] = $offer['version'];
+					if ( ! isset( $fp_versions[ $sub_ver_key ] ) ) {
+						$fp_versions[ $sub_ver_key ] = $offer['version'];
 					}
 				}
 			}
 		}
-		return strtr( $str, $wp_versions );
+		return strtr( $str, $fp_versions );
 	}
 
 	/**
@@ -1020,7 +1020,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	 */
 	public function create_run_dir(): void {
 		if ( ! isset( $this->variables['RUN_DIR'] ) ) {
-			self::$run_dir              = sys_get_temp_dir() . '/' . uniqid( 'wp-cli-test-run-' . self::$temp_dir_infix . '-', true );
+			self::$run_dir              = sys_get_temp_dir() . '/' . uniqid( 'fp-cli-test-run-' . self::$temp_dir_infix . '-', true );
 			$this->variables['RUN_DIR'] = self::$run_dir;
 			mkdir( $this->variables['RUN_DIR'] );
 		}
@@ -1030,15 +1030,15 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * @param string $version
 	 */
 	public function build_phar( $version = 'same' ): void {
-		$this->variables['PHAR_PATH'] = $this->variables['RUN_DIR'] . '/' . uniqid( 'wp-cli-build-', true ) . '.phar';
+		$this->variables['PHAR_PATH'] = $this->variables['RUN_DIR'] . '/' . uniqid( 'fp-cli-build-', true ) . '.phar';
 
 		$is_bundle = false;
 
-		// Test running against a package installed as a WP-CLI dependency
-		// WP-CLI bundle installed as a project dependency
-		$make_phar_path = self::get_vendor_dir() . '/wp-cli/wp-cli-bundle/utils/make-phar.php';
+		// Test running against a package installed as a FP-CLI dependency
+		// FP-CLI bundle installed as a project dependency
+		$make_phar_path = self::get_vendor_dir() . '/fp-cli/fp-cli-bundle/utils/make-phar.php';
 		if ( ! file_exists( $make_phar_path ) ) {
-			// Running against WP-CLI bundle proper
+			// Running against FP-CLI bundle proper
 			$is_bundle = true;
 
 			$make_phar_path = self::get_vendor_dir() . '/../utils/make-phar.php';
@@ -1074,16 +1074,16 @@ class FeatureContext implements SnippetAcceptingContext {
 	 */
 	public function download_phar( $version = 'same' ): void {
 		if ( 'same' === $version ) {
-			$version = WP_CLI_VERSION;
+			$version = FP_CLI_VERSION;
 		}
 
 		$download_url = sprintf(
-			'https://github.com/wp-cli/wp-cli/releases/download/v%1$s/wp-cli-%1$s.phar',
+			'https://github.com/fp-cli/fp-cli/releases/download/v%1$s/fp-cli-%1$s.phar',
 			$version
 		);
 
 		$this->variables['PHAR_PATH'] = $this->variables['RUN_DIR'] . '/'
-			. uniqid( 'wp-cli-download-', true )
+			. uniqid( 'fp-cli-download-', true )
 			. '.phar';
 
 		Process::create(
@@ -1099,7 +1099,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * CACHE_DIR is a cache for downloaded test data such as images. Lives until manually deleted.
 	 */
 	private function set_cache_dir(): void {
-		$path = sys_get_temp_dir() . '/wp-cli-test-cache';
+		$path = sys_get_temp_dir() . '/fp-cli-test-cache';
 		if ( ! file_exists( $path ) ) {
 			mkdir( $path );
 		}
@@ -1164,7 +1164,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		);
 
 		if ( 0 !== $sql_result['exit_code'] ) {
-			# WP_CLI output functions are suppressed in behat context.
+			# FP_CLI output functions are suppressed in behat context.
 			echo 'There was an error connecting to the database:' . \PHP_EOL;
 			if ( ! empty( $sql_result['stderr'] ) ) {
 				echo '  ' . trim( $sql_result['stderr'] ) . \PHP_EOL;
@@ -1200,7 +1200,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		$env = self::get_process_env_variables();
 
 		if ( isset( $this->variables['SUITE_CACHE_DIR'] ) ) {
-			$env['WP_CLI_CACHE_DIR'] = $this->variables['SUITE_CACHE_DIR'];
+			$env['FP_CLI_CACHE_DIR'] = $this->variables['SUITE_CACHE_DIR'];
 		}
 
 		if ( isset( $this->variables['PROJECT_DIR'] ) ) {
@@ -1217,7 +1217,7 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		$env['BEHAT_STEP_LINE'] = $this->step_line;
 
-		$env['WP_CLI_TEST_DBTYPE'] = self::$db_type;
+		$env['FP_CLI_TEST_DBTYPE'] = self::$db_type;
 
 		if ( isset( $this->variables['RUN_DIR'] ) ) {
 			$cwd = "{$this->variables['RUN_DIR']}/{$path}";
@@ -1285,19 +1285,19 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * @param string $wp_config_code
+	 * @param string $fp_config_code
 	 * @param string $line
 	 */
-	public function add_line_to_wp_config( &$wp_config_code, $line ): void {
+	public function add_line_to_fp_config( &$fp_config_code, $line ): void {
 		$token = "/* That's all, stop editing!";
 
-		$wp_config_code = str_replace( $token, "$line\n\n$token", $wp_config_code );
+		$fp_config_code = str_replace( $token, "$line\n\n$token", $fp_config_code );
 	}
 
 	/**
 	 * @param string $subdir
 	 */
-	public function download_wp( $subdir = '' ): void {
+	public function download_fp( $subdir = '' ): void {
 		$dest_dir = $this->variables['RUN_DIR'] . "/$subdir";
 
 		if ( $subdir ) {
@@ -1306,24 +1306,24 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		self::copy_dir( self::$cache_dir, $dest_dir );
 
-		if ( ! is_dir( $dest_dir . '/wp-content/mu-plugins' ) ) {
-			mkdir( $dest_dir . '/wp-content/mu-plugins' );
+		if ( ! is_dir( $dest_dir . '/fp-content/mu-plugins' ) ) {
+			mkdir( $dest_dir . '/fp-content/mu-plugins' );
 		}
 
 		// Disable emailing.
-		copy( dirname( __DIR__, 2 ) . '/utils/no-mail.php', $dest_dir . '/wp-content/mu-plugins/no-mail.php' );
+		copy( dirname( __DIR__, 2 ) . '/utils/no-mail.php', $dest_dir . '/fp-content/mu-plugins/no-mail.php' );
 
 		// Add polyfills.
-		copy( dirname( __DIR__, 2 ) . '/utils/polyfills.php', $dest_dir . '/wp-content/mu-plugins/polyfills.php' );
+		copy( dirname( __DIR__, 2 ) . '/utils/polyfills.php', $dest_dir . '/fp-content/mu-plugins/polyfills.php' );
 
 		if ( 'sqlite' === self::$db_type ) {
-			self::copy_dir( self::$sqlite_cache_dir, $dest_dir . '/wp-content/mu-plugins' );
+			self::copy_dir( self::$sqlite_cache_dir, $dest_dir . '/fp-content/mu-plugins' );
 			self::configure_sqlite( $dest_dir );
 		}
 	}
 
 	/**
-	 * Create a wp-config.php file.
+	 * Create a fp-config.php file.
 	 *
 	 * @param string $subdir
 	 * @param string|false $extra_php
@@ -1332,7 +1332,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		$params = self::$db_settings;
 
 		// Replaces all characters that are not alphanumeric or an underscore into an underscore.
-		$params['dbprefix'] = $subdir ? preg_replace( '#[^a-zA-Z\_0-9]#', '_', $subdir ) : 'wp_';
+		$params['dbprefix'] = $subdir ? preg_replace( '#[^a-zA-Z\_0-9]#', '_', $subdir ) : 'fp_';
 
 		$params['skip-salts'] = true;
 
@@ -1352,11 +1352,11 @@ class FeatureContext implements SnippetAcceptingContext {
 		}
 
 		if ( $config_cache_path && file_exists( $config_cache_path ) ) {
-			copy( $config_cache_path, $run_dir . '/wp-config.php' );
+			copy( $config_cache_path, $run_dir . '/fp-config.php' );
 		} else {
-			$this->proc( 'wp config create', $params, $subdir )->run_check();
-			if ( $config_cache_path && file_exists( $run_dir . '/wp-config.php' ) ) {
-				copy( $run_dir . '/wp-config.php', $config_cache_path );
+			$this->proc( 'fp config create', $params, $subdir )->run_check();
+			if ( $config_cache_path && file_exists( $run_dir . '/fp-config.php' ) ) {
+				copy( $run_dir . '/fp-config.php', $config_cache_path );
 			}
 		}
 	}
@@ -1364,29 +1364,29 @@ class FeatureContext implements SnippetAcceptingContext {
 	/**
 	 * @param string $subdir
 	 */
-	public function install_wp( $subdir = '' ): void {
-		$wp_version              = getenv( 'WP_VERSION' );
-		$wp_version_suffix       = ( false !== $wp_version ) ? "-$wp_version" : '';
-		self::$install_cache_dir = sys_get_temp_dir() . '/wp-cli-test-core-install-cache' . $wp_version_suffix;
+	public function install_fp( $subdir = '' ): void {
+		$fp_version              = getenv( 'FP_VERSION' );
+		$fp_version_suffix       = ( false !== $fp_version ) ? "-$fp_version" : '';
+		self::$install_cache_dir = sys_get_temp_dir() . '/fp-cli-test-core-install-cache' . $fp_version_suffix;
 		if ( ! file_exists( self::$install_cache_dir ) ) {
 			mkdir( self::$install_cache_dir );
 		}
 
 		$subdir = $this->replace_variables( $subdir );
 
-		// Disable WP Cron by default to avoid bogus HTTP requests in CLI context.
-		$config_extra_php = "if ( ! defined( 'DISABLE_WP_CRON' ) ) { define( 'DISABLE_WP_CRON', true ); }\n";
+		// Disable FP Cron by default to avoid bogus HTTP requests in CLI context.
+		$config_extra_php = "if ( ! defined( 'DISABLE_FP_CRON' ) ) { define( 'DISABLE_FP_CRON', true ); }\n";
 
 		if ( 'sqlite' !== self::$db_type ) {
 			$this->create_db();
 		}
 		$this->create_run_dir();
-		$this->download_wp( $subdir );
+		$this->download_fp( $subdir );
 		$this->create_config( $subdir, $config_extra_php );
 
 		$install_args = [
 			'url'            => 'https://example.com',
-			'title'          => 'WP CLI Site',
+			'title'          => 'FP CLI Site',
 			'admin_user'     => 'admin',
 			'admin_email'    => 'admin@example.com',
 			'admin_password' => 'password1',
@@ -1402,12 +1402,12 @@ class FeatureContext implements SnippetAcceptingContext {
 
 			// This is the sqlite equivalent of restoring a database dump in MySQL
 			if ( 'sqlite' === self::$db_type ) {
-				copy( "{$install_cache_path}.sqlite", "$run_dir/wp-content/database/.ht.sqlite" );
+				copy( "{$install_cache_path}.sqlite", "$run_dir/fp-content/database/.ht.sqlite" );
 			} else {
 				self::run_sql( self::$mysql_binary . ' --no-defaults', [ 'execute' => "source {$install_cache_path}.sql" ], true /*add_database*/ );
 			}
 		} else {
-			$this->proc( 'wp core install', $install_args, $subdir )->run_check();
+			$this->proc( 'fp core install', $install_args, $subdir )->run_check();
 
 			mkdir( $install_cache_path );
 
@@ -1426,7 +1426,7 @@ class FeatureContext implements SnippetAcceptingContext {
 
 			if ( 'sqlite' === self::$db_type ) {
 				// This is the sqlite equivalent of creating a database dump in MySQL
-				copy( "$run_dir/wp-content/database/.ht.sqlite", "{$install_cache_path}.sqlite" );
+				copy( "$run_dir/fp-content/database/.ht.sqlite", "{$install_cache_path}.sqlite" );
 			}
 		}
 	}
@@ -1434,53 +1434,53 @@ class FeatureContext implements SnippetAcceptingContext {
 	/**
 	 * @param string $vendor_directory
 	 */
-	public function install_wp_with_composer( $vendor_directory = 'vendor' ): void {
+	public function install_fp_with_composer( $vendor_directory = 'vendor' ): void {
 		$this->create_run_dir();
 		$this->create_db();
 
-		$yml_path = $this->variables['RUN_DIR'] . '/wp-cli.yml';
-		file_put_contents( $yml_path, 'path: WordPress' );
+		$yml_path = $this->variables['RUN_DIR'] . '/fp-cli.yml';
+		file_put_contents( $yml_path, 'path: FinPress' );
 
-		$this->composer_command( 'init --name="wp-cli/composer-test" --type="project"' );
+		$this->composer_command( 'init --name="fp-cli/composer-test" --type="project"' );
 		$this->composer_command( 'config vendor-dir ' . $vendor_directory );
-		$this->composer_command( 'config extra.wordpress-install-dir WordPress' );
+		$this->composer_command( 'config extra.finpress-install-dir FinPress' );
 
 		// Allow for all Composer plugins to run to avoid warnings.
 		$this->composer_command( 'config --no-plugins allow-plugins true' );
-		$this->composer_command( 'require johnpbloch/wordpress-core-installer johnpbloch/wordpress-core --optimize-autoloader' );
+		$this->composer_command( 'require johnpbloch/finpress-core-installer johnpbloch/finpress-core --optimize-autoloader' );
 
-		// Disable WP Cron by default to avoid bogus HTTP requests in CLI context.
-		$config_extra_php = "if ( ! defined( 'DISABLE_WP_CRON' ) ) { define( 'DISABLE_WP_CRON', true ); }\n";
+		// Disable FP Cron by default to avoid bogus HTTP requests in CLI context.
+		$config_extra_php = "if ( ! defined( 'DISABLE_FP_CRON' ) ) { define( 'DISABLE_FP_CRON', true ); }\n";
 
 		$config_extra_php .= "require_once dirname(__DIR__) . '/" . $vendor_directory . "/autoload.php';\n";
 
-		$this->create_config( 'WordPress', $config_extra_php );
+		$this->create_config( 'FinPress', $config_extra_php );
 
 		$install_args = [
 			'url'            => 'http://localhost:8080',
-			'title'          => 'WP CLI Site with both WordPress and wp-cli as Composer dependencies',
+			'title'          => 'FP CLI Site with both FinPress and fp-cli as Composer dependencies',
 			'admin_user'     => 'admin',
 			'admin_email'    => 'admin@example.com',
 			'admin_password' => 'password1',
 			'skip-email'     => true,
 		];
 
-		if ( ! is_dir( $this->variables['RUN_DIR'] . '/WordPress/wp-content/mu-plugins' ) ) {
-			mkdir( $this->variables['RUN_DIR'] . '/WordPress/wp-content/mu-plugins' );
+		if ( ! is_dir( $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins' ) ) {
+			mkdir( $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins' );
 		}
 
 		if ( 'sqlite' === self::$db_type ) {
-			mkdir( $this->variables['RUN_DIR'] . '/WordPress/wp-content/mu-plugins/sqlite-database-integration' );
-			self::copy_dir( self::$sqlite_cache_dir, $this->variables['RUN_DIR'] . '/WordPress/wp-content/mu-plugins' );
-			self::configure_sqlite( $this->variables['RUN_DIR'] . '/WordPress' );
+			mkdir( $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins/sqlite-database-integration' );
+			self::copy_dir( self::$sqlite_cache_dir, $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins' );
+			self::configure_sqlite( $this->variables['RUN_DIR'] . '/FinPress' );
 		}
 
-		$this->proc( 'wp core install', $install_args )->run_check();
+		$this->proc( 'fp core install', $install_args )->run_check();
 	}
 
-	public function composer_add_wp_cli_local_repository(): void {
+	public function composer_add_fp_cli_local_repository(): void {
 		if ( ! self::$composer_local_repository ) {
-			self::$composer_local_repository = sys_get_temp_dir() . '/' . uniqid( 'wp-cli-composer-local-', true );
+			self::$composer_local_repository = sys_get_temp_dir() . '/' . uniqid( 'fp-cli-composer-local-', true );
 			mkdir( self::$composer_local_repository );
 
 			$env = self::get_process_env_variables();
@@ -1491,14 +1491,14 @@ class FeatureContext implements SnippetAcceptingContext {
 			self::remove_dir( self::$composer_local_repository . '/vendor' );
 		}
 		$dest = self::$composer_local_repository . '/';
-		$this->composer_command( "config repositories.wp-cli '{\"type\": \"path\", \"url\": \"$dest\", \"options\": {\"symlink\": false, \"versions\": { \"wp-cli/wp-cli\": \"dev-main\"}}}'" );
+		$this->composer_command( "config repositories.fp-cli '{\"type\": \"path\", \"url\": \"$dest\", \"options\": {\"symlink\": false, \"versions\": { \"fp-cli/fp-cli\": \"dev-main\"}}}'" );
 		$this->variables['COMPOSER_LOCAL_REPOSITORY'] = self::$composer_local_repository;
 	}
 
-	public function composer_require_current_wp_cli(): void {
-		$this->composer_add_wp_cli_local_repository();
+	public function composer_require_current_fp_cli(): void {
+		$this->composer_add_fp_cli_local_repository();
 		// TODO: Specific alias version should be deduced to keep up-to-date.
-		$this->composer_command( 'require "wp-cli/wp-cli:dev-main as 2.5.x-dev" --optimize-autoloader' );
+		$this->composer_command( 'require "fp-cli/fp-cli:dev-main as 2.5.x-dev" --optimize-autoloader' );
 	}
 
 	/**
@@ -1515,7 +1515,7 @@ class FeatureContext implements SnippetAcceptingContext {
 			'localhost:8080',
 			$dir,
 			get_cfg_var( 'cfg_file_path' ),
-			$this->variables['RUN_DIR'] . '/vendor/wp-cli/server-command/router.php'
+			$this->variables['RUN_DIR'] . '/vendor/fp-cli/server-command/router.php'
 		);
 		$this->background_proc( $cmd );
 	}
@@ -1547,7 +1547,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		self::$num_top_processes = $travis ? 10 : 40;
 		self::$num_top_scenarios = $travis ? 10 : 20;
 
-		// Allow setting of above with "WP_CLI_TEST_LOG_RUN_TIMES=<output_to>[,<num_top_processes>][,<num_top_scenarios>]" formatted env var.
+		// Allow setting of above with "FP_CLI_TEST_LOG_RUN_TIMES=<output_to>[,<num_top_processes>][,<num_top_scenarios>]" formatted env var.
 		if ( preg_match( '/^(stdout|error_log)?(,[0-9]+)?(,[0-9]+)?$/i', self::$log_run_times, $matches ) ) {
 			if ( isset( $matches[1] ) ) {
 				self::$output_to = strtolower( $matches[1] );
@@ -1761,8 +1761,8 @@ class FeatureContext implements SnippetAcceptingContext {
 /**
  * @param string $message
  */
-function wp_cli_behat_env_debug( $message ): void { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
-	if ( ! getenv( 'WP_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
+function fp_cli_behat_env_debug( $message ): void { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
+	if ( ! getenv( 'FP_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
 		return;
 	}
 
@@ -1772,9 +1772,9 @@ function wp_cli_behat_env_debug( $message ): void { // phpcs:ignore Universal.Fi
 /**
  * Load required support files as needed before heading into the Behat context.
  */
-function wpcli_bootstrap_behat_feature_context(): void {
+function fpcli_bootstrap_behat_feature_context(): void {
 	$vendor_folder = FeatureContext::get_vendor_dir();
-	wp_cli_behat_env_debug( "Vendor folder location: {$vendor_folder}" );
+	fp_cli_behat_env_debug( "Vendor folder location: {$vendor_folder}" );
 
 	// Didn't manage to detect a valid vendor folder.
 	if ( empty( $vendor_folder ) ) {
@@ -1785,12 +1785,12 @@ function wpcli_bootstrap_behat_feature_context(): void {
 	$project_folder = dirname( $vendor_folder );
 
 	$framework_folder = FeatureContext::get_framework_dir();
-	wp_cli_behat_env_debug( "Framework folder location: {$framework_folder}" );
+	fp_cli_behat_env_debug( "Framework folder location: {$framework_folder}" );
 
 	// Load helper functionality that is needed for the tests.
 	require_once "{$framework_folder}/php/utils.php";
-	require_once "{$framework_folder}/php/WP_CLI/Process.php";
-	require_once "{$framework_folder}/php/WP_CLI/ProcessRun.php";
+	require_once "{$framework_folder}/php/FP_CLI/Process.php";
+	require_once "{$framework_folder}/php/FP_CLI/ProcessRun.php";
 
 	// Manually load Composer file includes by generating a config with require:
 	// statements for each file.
@@ -1809,7 +1809,7 @@ function wpcli_bootstrap_behat_feature_context(): void {
 		$contents .= "  - {$project_folder}/{$file}\n";
 	}
 
-	$temp_folder = sys_get_temp_dir() . '/wp-cli-package-test';
+	$temp_folder = sys_get_temp_dir() . '/fp-cli-package-test';
 	if (
 		! is_dir( $temp_folder )
 		&& ! mkdir( $temp_folder )
@@ -1820,10 +1820,10 @@ function wpcli_bootstrap_behat_feature_context(): void {
 
 	$project_config = "{$temp_folder}/config.yml";
 	file_put_contents( $project_config, $contents );
-	putenv( 'WP_CLI_CONFIG_PATH=' . $project_config );
+	putenv( 'FP_CLI_CONFIG_PATH=' . $project_config );
 
-	wp_cli_behat_env_debug( "Project config file location: {$project_config}" );
-	wp_cli_behat_env_debug( "Project config:\n{$contents}" );
+	fp_cli_behat_env_debug( "Project config file location: {$project_config}" );
+	fp_cli_behat_env_debug( "Project config:\n{$contents}" );
 }
 
-wpcli_bootstrap_behat_feature_context();
+fpcli_bootstrap_behat_feature_context();

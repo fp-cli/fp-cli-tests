@@ -1,14 +1,14 @@
 services:
   -
-    class: WP_CLI\Tests\PHPStan\ParseUrlFunctionDynamicReturnTypeExtension
+    class: FP_CLI\Tests\PHPStan\ParseUrlFunctionDynamicReturnTypeExtension
     tags:
       - phpstan.broker.dynamicFunctionReturnTypeExtension
   -
-    class: WP_CLI\Tests\PHPStan\GetFlagValueFunctionDynamicReturnTypeExtension
+    class: FP_CLI\Tests\PHPStan\GetFlagValueFunctionDynamicReturnTypeExtension
     tags:
       - phpstan.broker.dynamicFunctionReturnTypeExtension
   -
-    class: WP_CLI\Tests\PHPStan\WPCliRuncommandDynamicReturnTypeExtension
+    class: FP_CLI\Tests\PHPStan\FPCliRuncommandDynamicReturnTypeExtension
     tags:
       - phpstan.broker.dynamicStaticMethodReturnTypeExtension
 parameters:

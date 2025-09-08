@@ -2,9 +2,9 @@
 /**
  * Generate a list of tags to skip during the test run.
  *
- * Require a minimum version of WordPress:
+ * Require a minimum version of FinPress:
  *
- *   @require-wp-4.0
+ *   @require-fp-4.0
  *   Scenario: Core translation CRUD
  *
  * Then use in bash script:
@@ -41,53 +41,53 @@ function version_tags(
 }
 
 function get_db_version() {
-	$version_string = exec( getenv( 'WP_CLI_TEST_DBTYPE' ) === 'mariadb' ? 'mariadb --version' : 'mysql -V' );
+	$version_string = exec( getenv( 'FP_CLI_TEST_DBTYPE' ) === 'mariadb' ? 'mariadb --version' : 'mysql -V' );
 	preg_match( '@[0-9]+\.[0-9]+\.[0-9]+@', $version_string, $version );
 	return $version[0];
 }
 
 $features_folder = getenv( 'BEHAT_FEATURES_FOLDER' ) ?: 'features';
-$wp_version      = getenv( 'WP_VERSION' );
-$wp_version_reqs = array();
-// Only apply @require-wp tags when WP_VERSION isn't 'latest', 'nightly' or 'trunk'.
+$fp_version      = getenv( 'FP_VERSION' );
+$fp_version_reqs = array();
+// Only apply @require-fp tags when FP_VERSION isn't 'latest', 'nightly' or 'trunk'.
 // 'latest', 'nightly' and 'trunk' are expected to work with all features.
-if ( $wp_version &&
-	! in_array( $wp_version, array( 'latest', 'nightly', 'trunk' ), true ) ) {
-	$wp_version_reqs = array_merge(
-		version_tags( 'require-wp', $wp_version, '<', $features_folder ),
-		version_tags( 'less-than-wp', $wp_version, '>=', $features_folder )
+if ( $fp_version &&
+	! in_array( $fp_version, array( 'latest', 'nightly', 'trunk' ), true ) ) {
+	$fp_version_reqs = array_merge(
+		version_tags( 'require-fp', $fp_version, '<', $features_folder ),
+		version_tags( 'less-than-fp', $fp_version, '>=', $features_folder )
 	);
 } else {
-	// But make sure @less-than-wp tags always exist for those special cases. (Note: @less-than-wp-latest etc won't work and shouldn't be used).
-	$wp_version_reqs = array_merge(
-		$wp_version_reqs,
-		version_tags( 'less-than-wp', '9999', '>=', $features_folder )
+	// But make sure @less-than-fp tags always exist for those special cases. (Note: @less-than-fp-latest etc won't work and shouldn't be used).
+	$fp_version_reqs = array_merge(
+		$fp_version_reqs,
+		version_tags( 'less-than-fp', '9999', '>=', $features_folder )
 	);
 }
 
 $skip_tags = array_merge(
-	$wp_version_reqs,
+	$fp_version_reqs,
 	version_tags( 'require-php', PHP_VERSION, '<', $features_folder ),
-	// Note: this was '>' prior to WP-CLI 1.5.0 but the change is unlikely to
+	// Note: this was '>' prior to FP-CLI 1.5.0 but the change is unlikely to
 	// cause BC issues as usually compared against major.minor only.
 	version_tags( 'less-than-php', PHP_VERSION, '>=', $features_folder )
 );
 
 // Skip GitHub API tests if `GITHUB_TOKEN` not available because of rate
-// limiting. See https://github.com/wp-cli/wp-cli/issues/1612
+// limiting. See https://github.com/fp-cli/fp-cli/issues/1612
 if ( ! getenv( 'GITHUB_TOKEN' ) ) {
 	$skip_tags[] = '@github-api';
 }
 # Skip tests known to be broken.
 $skip_tags[] = '@broken';
 
-if ( $wp_version && in_array( $wp_version, array( 'nightly', 'trunk' ), true ) ) {
+if ( $fp_version && in_array( $fp_version, array( 'nightly', 'trunk' ), true ) ) {
 	$skip_tags[] = '@broken-trunk';
 }
 
 $db_version = get_db_version();
 
-switch ( getenv( 'WP_CLI_TEST_DBTYPE' ) ) {
+switch ( getenv( 'FP_CLI_TEST_DBTYPE' ) ) {
 	case 'mariadb':
 		$skip_tags = array_merge(
 			$skip_tags,

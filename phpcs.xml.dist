@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="WP-CLI-tests">
-	<description>Custom ruleset for WP-CLI-tests</description>
+<ruleset name="FP-CLI-tests">
+	<description>Custom ruleset for FP-CLI-tests</description>
 
 	<!--
 	#############################################################################
@@ -27,11 +27,11 @@
 
 	<!--
 	#############################################################################
-	USE THE WP_CLI_CS RULESET
+	USE THE FP_CLI_CS RULESET
 	#############################################################################
 	-->
 
-	<rule ref="WP_CLI_CS"/>
+	<rule ref="FP_CLI_CS"/>
 
 	<!--
 	#############################################################################
@@ -44,11 +44,11 @@
 	<config name="testVersion" value="7.2-"/>
 
 	<!-- Verify that everything in the global namespace is either namespaced or prefixed.
-		 See: https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties#naming-conventions-prefix-everything-in-the-global-namespace -->
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		 See: https://github.com/FinPress-Coding-Standards/FinPress-Coding-Standards/wiki/Customizable-sniff-properties#naming-conventions-prefix-everything-in-the-global-namespace -->
+	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array" extend="true">
-				<element value="WP_CLI\Tests"/><!-- Namespaces. -->
+				<element value="FP_CLI\Tests"/><!-- Namespaces. -->
 			</property>
 		</properties>
 	</rule>
@@ -61,13 +61,13 @@
 
 	<exclude-pattern>tests/phpstan/scan-files.php</exclude-pattern>
 
-	<rule ref="WordPress.NamingConventions">
+	<rule ref="FinPress.NamingConventions">
 		<exclude-pattern>tests/data/*</exclude-pattern>
 		<exclude-pattern>src/PHPStan/*</exclude-pattern>
 		<exclude-pattern>tests/tests/PHPStan/*</exclude-pattern>
 	</rule>
 
-	<rule ref="WordPress.WP.AlternativeFunctions.parse_url_parse_url">
+	<rule ref="FinPress.FP.AlternativeFunctions.parse_url_parse_url">
 		<exclude-pattern>tests/data/*</exclude-pattern>
 	</rule>
 
@@ -75,27 +75,27 @@
 		<exclude-pattern>src/PHPStan/*</exclude-pattern>
 	</rule>
 
-	<!-- This is a procedural stand-alone file that is never loaded in a WordPress context,
-		 so this file does not have to comply with WP naming conventions. -->
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+	<!-- This is a procedural stand-alone file that is never loaded in a FinPress context,
+		 so this file does not have to comply with FP naming conventions. -->
+	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<exclude-pattern>*/utils/behat-tags\.php$</exclude-pattern>
 	</rule>
-	<rule ref="WordPress.WP.GlobalVariablesOverride">
+	<rule ref="FinPress.FP.GlobalVariablesOverride">
 		<exclude-pattern>*/utils/behat-tags\.php$</exclude-pattern>
 	</rule>
 
 	<!-- This is a procedural stand-alone file that is adding polyfills when
 		 applicable only. -->
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<exclude-pattern>*/utils/polyfills\.php$</exclude-pattern>
 	</rule>
 
-	<!-- This is a procedural stand-alone file that is never loaded in a WordPress context,
-		 so this file does not have to comply with WP naming conventions. -->
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+	<!-- This is a procedural stand-alone file that is never loaded in a FinPress context,
+		 so this file does not have to comply with FP naming conventions. -->
+	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<exclude-pattern>*/generate-coverage\.php$</exclude-pattern>
 	</rule>
-	<rule ref="WordPress.WP.GlobalVariablesOverride">
+	<rule ref="FinPress.FP.GlobalVariablesOverride">
 		<exclude-pattern>*/generate-coverage\.php$</exclude-pattern>
 	</rule>
 </ruleset>

@@ -1,11 +1,11 @@
 {
-    "name": "wp-cli/wp-cli-tests",
-    "description": "WP-CLI testing framework",
+    "name": "fp-cli/fp-cli-tests",
+    "description": "FP-CLI testing framework",
     "keywords": [
         "cli",
-        "wordpress"
+        "finpress"
     ],
-    "homepage": "https://wp-cli.org",
+    "homepage": "https://fp-cli.org",
     "license": "MIT",
     "type": "phpcodesniffer-standard",
     "require": {
@@ -21,12 +21,12 @@
         "phpstan/phpstan-phpunit": "^1.4",
         "phpstan/phpstan-strict-rules": "^1.6",
         "swissspidy/phpstan-no-private": "^0.2.1",
-        "szepeviktor/phpstan-wordpress": "^v1.3.5",
-        "wp-cli/config-command": "^1 || ^2",
-        "wp-cli/core-command": "^1 || ^2",
-        "wp-cli/eval-command": "^1 || ^2",
-        "wp-cli/wp-cli": "^2.12",
-        "wp-coding-standards/wpcs": "^3",
+        "szepeviktor/phpstan-finpress": "^v1.3.5",
+        "fp-cli/config-command": "^1 || ^2",
+        "fp-cli/core-command": "^1 || ^2",
+        "fp-cli/eval-command": "^1 || ^2",
+        "fp-cli/fp-cli": "^2.12",
+        "fp-coding-standards/fpcs": "^3",
         "yoast/phpunit-polyfills": "^4.0.0"
     },
     "require-dev": {
@@ -35,7 +35,7 @@
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "johnpbloch/wordpress-core-installer": true,
+            "johnpbloch/finpress-core-installer": true,
             "phpstan/extension-installer": true
         },
         "sort-packages": true,
@@ -64,12 +64,12 @@
     },
     "autoload": {
         "psr-4": {
-            "WP_CLI\\Tests\\": "src"
+            "FP_CLI\\Tests\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "WP_CLI\\Tests\\Tests\\": "tests/tests"
+            "FP_CLI\\Tests\\Tests\\": "tests/tests"
         }
     },
     "minimum-stability": "dev",
@@ -102,8 +102,8 @@
         ]
     },
     "support": {
-        "issues": "https://github.com/wp-cli/wp-cli-tests/issues",
-        "source": "https://github.com/wp-cli/wp-cli-tests",
-        "docs": "https://make.wordpress.org/cli/handbook/"
+        "issues": "https://github.com/fp-cli/fp-cli-tests/issues",
+        "source": "https://github.com/fp-cli/fp-cli-tests",
+        "docs": "https://make.finpress.org/cli/handbook/"
     }
 }

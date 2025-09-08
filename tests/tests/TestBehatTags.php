@@ -1,9 +1,9 @@
 <?php
 
-namespace WP_CLI\Tests\Tests;
+namespace FP_CLI\Tests\Tests;
 
-use WP_CLI\Tests\TestCase;
-use WP_CLI\Utils;
+use FP_CLI\Tests\TestCase;
+use FP_CLI\Utils;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
@@ -17,7 +17,7 @@ class TestBehatTags extends TestCase {
 	protected function set_up(): void {
 		parent::set_up();
 
-		$this->temp_dir = Utils\get_temp_dir() . uniqid( 'wp-cli-test-behat-tags-', true );
+		$this->temp_dir = Utils\get_temp_dir() . uniqid( 'fp-cli-test-behat-tags-', true );
 		mkdir( $this->temp_dir );
 		mkdir( $this->temp_dir . '/features' );
 	}
@@ -36,29 +36,29 @@ class TestBehatTags extends TestCase {
 	}
 
 	/**
-	 * @dataProvider data_behat_tags_wp_version_github_token
+	 * @dataProvider data_behat_tags_fp_version_github_token
 	 *
 	 * @param string $env
 	 * @param string $expected
 	 */
-	#[DataProvider( 'data_behat_tags_wp_version_github_token' )] // phpcs:ignore PHPCompatibility.Attributes.NewAttributes.PHPUnitAttributeFound
-	public function test_behat_tags_wp_version_github_token( $env, $expected ): void {
-		$env_wp_version   = getenv( 'WP_VERSION' );
+	#[DataProvider( 'data_behat_tags_fp_version_github_token' )] // phpcs:ignore PHPCompatibility.Attributes.NewAttributes.PHPUnitAttributeFound
+	public function test_behat_tags_fp_version_github_token( $env, $expected ): void {
+		$env_fp_version   = getenv( 'FP_VERSION' );
 		$env_github_token = getenv( 'GITHUB_TOKEN' );
-		$db_type          = getenv( 'WP_CLI_TEST_DBTYPE' );
+		$db_type          = getenv( 'FP_CLI_TEST_DBTYPE' );
 
-		putenv( 'WP_VERSION' );
+		putenv( 'FP_VERSION' );
 		putenv( 'GITHUB_TOKEN' );
 
 		$behat_tags = dirname( dirname( __DIR__ ) ) . '/utils/behat-tags.php';
 
-		$contents = '@require-wp-4.6 @require-wp-4.8 @require-wp-4.9 @less-than-wp-4.6 @less-than-wp-4.8 @less-than-wp-4.9';
-		file_put_contents( $this->temp_dir . '/features/wp_version.feature', $contents );
+		$contents = '@require-fp-4.6 @require-fp-4.8 @require-fp-4.9 @less-than-fp-4.6 @less-than-fp-4.8 @less-than-fp-4.9';
+		file_put_contents( $this->temp_dir . '/features/fp_version.feature', $contents );
 
 		$output = exec( "cd {$this->temp_dir}; $env php $behat_tags" );
 
 		$expected .= '&&~@broken';
-		if ( in_array( $env, array( 'WP_VERSION=trunk', 'WP_VERSION=nightly' ), true ) ) {
+		if ( in_array( $env, array( 'FP_VERSION=trunk', 'FP_VERSION=nightly' ), true ) ) {
 			$expected .= '&&~@broken-trunk';
 		}
 
@@ -81,26 +81,26 @@ class TestBehatTags extends TestCase {
 
 		$this->assertSame( '--tags=' . $expected, $output );
 
-		putenv( false === $env_wp_version ? 'WP_VERSION' : "WP_VERSION=$env_wp_version" );
+		putenv( false === $env_fp_version ? 'FP_VERSION' : "FP_VERSION=$env_fp_version" );
 		putenv( false === $env_github_token ? 'GITHUB_TOKEN' : "GITHUB_TOKEN=$env_github_token" );
 	}
 
 	/**
 	 * @return array<array{string, string}>
 	 */
-	public static function data_behat_tags_wp_version_github_token(): array {
+	public static function data_behat_tags_fp_version_github_token(): array {
 		return array(
-			array( 'WP_VERSION=4.5', '~@require-wp-4.6&&~@require-wp-4.8&&~@require-wp-4.9&&~@github-api' ),
-			array( 'WP_VERSION=4.6', '~@require-wp-4.8&&~@require-wp-4.9&&~@less-than-wp-4.6&&~@github-api' ),
-			array( 'WP_VERSION=4.7', '~@require-wp-4.8&&~@require-wp-4.9&&~@less-than-wp-4.6&&~@github-api' ),
-			array( 'WP_VERSION=4.8', '~@require-wp-4.9&&~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@github-api' ),
-			array( 'WP_VERSION=4.9', '~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@less-than-wp-4.9&&~@github-api' ),
-			array( 'WP_VERSION=5.0', '~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@less-than-wp-4.9&&~@github-api' ),
-			array( 'WP_VERSION=latest', '~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@less-than-wp-4.9&&~@github-api' ),
-			array( 'WP_VERSION=trunk', '~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@less-than-wp-4.9&&~@github-api' ),
-			array( 'WP_VERSION=nightly', '~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@less-than-wp-4.9&&~@github-api' ),
-			array( '', '~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@less-than-wp-4.9&&~@github-api' ),
-			array( 'GITHUB_TOKEN=blah', '~@less-than-wp-4.6&&~@less-than-wp-4.8&&~@less-than-wp-4.9' ),
+			array( 'FP_VERSION=4.5', '~@require-fp-4.6&&~@require-fp-4.8&&~@require-fp-4.9&&~@github-api' ),
+			array( 'FP_VERSION=4.6', '~@require-fp-4.8&&~@require-fp-4.9&&~@less-than-fp-4.6&&~@github-api' ),
+			array( 'FP_VERSION=4.7', '~@require-fp-4.8&&~@require-fp-4.9&&~@less-than-fp-4.6&&~@github-api' ),
+			array( 'FP_VERSION=4.8', '~@require-fp-4.9&&~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@github-api' ),
+			array( 'FP_VERSION=4.9', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
+			array( 'FP_VERSION=5.0', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
+			array( 'FP_VERSION=latest', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
+			array( 'FP_VERSION=trunk', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
+			array( 'FP_VERSION=nightly', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
+			array( '', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
+			array( 'GITHUB_TOKEN=blah', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9' ),
 		);
 	}
 
@@ -153,7 +153,7 @@ class TestBehatTags extends TestCase {
 
 	public function test_behat_tags_extension(): void {
 		$env_github_token = getenv( 'GITHUB_TOKEN' );
-		$db_type          = getenv( 'WP_CLI_TEST_DBTYPE' );
+		$db_type          = getenv( 'FP_CLI_TEST_DBTYPE' );
 
 		putenv( 'GITHUB_TOKEN' );
 
@@ -195,7 +195,7 @@ class TestBehatTags extends TestCase {
 	}
 
 	public function test_behat_tags_db_version(): void {
-		$db_type = getenv( 'WP_CLI_TEST_DBTYPE' );
+		$db_type = getenv( 'FP_CLI_TEST_DBTYPE' );
 
 		$behat_tags = dirname( dirname( __DIR__ ) ) . '/utils/behat-tags.php';
 		require $behat_tags;

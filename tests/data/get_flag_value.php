@@ -6,9 +6,9 @@
 
 declare(strict_types=1);
 
-namespace WP_CLI\Tests\Tests\PHPStan;
+namespace FP_CLI\Tests\Tests\PHPStan;
 
-use function WP_CLI\Utils\get_flag_value;
+use function FP_CLI\Utils\get_flag_value;
 use function PHPStan\Testing\assertType;
 
 $value = get_flag_value(

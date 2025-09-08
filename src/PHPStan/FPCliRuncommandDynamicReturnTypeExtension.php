@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WP_CLI\Tests\PHPStan;
+namespace FP_CLI\Tests\PHPStan;
 
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Arg;
@@ -22,10 +22,10 @@ use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\ObjectShapeType;
 use PHPStan\Type\NeverType;
 
-class WPCliRuncommandDynamicReturnTypeExtension implements DynamicStaticMethodReturnTypeExtension {
+class FPCliRuncommandDynamicReturnTypeExtension implements DynamicStaticMethodReturnTypeExtension {
 
 	public function getClass(): string {
-		return 'WP_CLI';
+		return 'FP_CLI';
 	}
 
 	public function isStaticMethodSupported( MethodReflection $methodReflection ): bool {

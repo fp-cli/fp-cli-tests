@@ -1,8 +1,8 @@
-To make use of the WP-CLI testing framework, you need to complete the following steps from within the package you want to add them to:
+To make use of the FP-CLI testing framework, you need to complete the following steps from within the package you want to add them to:
 
 1. Add the testing framework as a development requirement:
     ```bash
-    composer require --dev wp-cli/wp-cli-tests
+    composer require --dev fp-cli/fp-cli-tests
     ```
 
 2. Add the required test scripts to the `composer.json` file:
@@ -39,7 +39,7 @@ To make use of the WP-CLI testing framework, you need to complete the following 
       suites:
         default:
           contexts:
-            - WP_CLI\Tests\Context\FeatureContext
+            - FP_CLI\Tests\Context\FeatureContext
           paths:
             - features
     ```
@@ -47,11 +47,11 @@ To make use of the WP-CLI testing framework, you need to complete the following 
 
 5. Optionally add a `phpcs.xml.dist` file to the package root to enable code style and best practice checks using PHP_CodeSniffer.
 
-    Example of a minimal custom ruleset based on the defaults set in the WP-CLI testing framework:
+    Example of a minimal custom ruleset based on the defaults set in the FP-CLI testing framework:
     ```xml
     <?xml version="1.0"?>
-    <ruleset name="WP-CLI-PROJECT-NAME">
-    <description>Custom ruleset for WP-CLI PROJECT NAME</description>
+    <ruleset name="FP-CLI-PROJECT-NAME">
+    <description>Custom ruleset for FP-CLI PROJECT NAME</description>
 
         <!-- What to scan. -->
         <file>.</file>
@@ -69,8 +69,8 @@ To make use of the WP-CLI testing framework, you need to complete the following 
              https://github.com/PHPCompatibility/PHPCompatibility#sniffing-your-code-for-compatibility-with-specific-php-versions -->
         <config name="testVersion" value="5.4-"/>
 
-        <!-- Rules: Include the base ruleset for WP-CLI projects. -->
-        <rule ref="WP_CLI_CS"/>
+        <!-- Rules: Include the base ruleset for FP-CLI projects. -->
+        <rule ref="FP_CLI_CS"/>
 
     </ruleset>
     ```
@@ -106,34 +106,34 @@ Prepending with the double dash is needed because the arguments would otherwise 
 
 ### Controlling the test environment
 
-#### WordPress Version
+#### FinPress Version
 
-You can run the tests against a specific version of WordPress by setting the `WP_VERSION` environment variable.
+You can run the tests against a specific version of FinPress by setting the `FP_VERSION` environment variable.
 
 This variable understands any numeric version, as well as the special terms `latest` and `trunk`.
 
-Note: This only applies to the Behat functional tests. All other tests never load WordPress.
+Note: This only applies to the Behat functional tests. All other tests never load FinPress.
 
-Here's how to run your tests against the latest trunk version of WordPress:
+Here's how to run your tests against the latest trunk version of FinPress:
 ```bash
-WP_VERSION=trunk composer behat
+FP_VERSION=trunk composer behat
 ```
 
-#### WP-CLI Binary
+#### FP-CLI Binary
 
-You can run the tests against a specific WP-CLI binary, instead of using the one that has been built in your project's `vendor/bin` folder.
+You can run the tests against a specific FP-CLI binary, instead of using the one that has been built in your project's `vendor/bin` folder.
 
-This can be useful to run your tests against a specific Phar version of WP_CLI.
+This can be useful to run your tests against a specific Phar version of FP_CLI.
 
-To do this, you can set the `WP_CLI_BIN_DIR` environment variable to point to a folder that contains an executable `wp` binary. Note: the binary has to be named `wp` to be properly recognized.
+To do this, you can set the `FP_CLI_BIN_DIR` environment variable to point to a folder that contains an executable `fp` binary. Note: the binary has to be named `fp` to be properly recognized.
 
 As an example, here's how to run your tests against a specific Phar version you've downloaded.
 ```bash
-# Prepare the binary you've downloaded into the ~/wp-cli folder first.
-mv ~/wp-cli/wp-cli-1.2.0.phar ~/wp-cli/wp
-chmod +x ~/wp-cli/wp
+# Prepare the binary you've downloaded into the ~/fp-cli folder first.
+mv ~/fp-cli/fp-cli-1.2.0.phar ~/fp-cli/fp
+chmod +x ~/fp-cli/fp
 
-WP_CLI_BIN_DIR=~/wp-cli composer behat
+FP_CLI_BIN_DIR=~/fp-cli composer behat
 ```
 
 ### Setting up the tests in Travis CI
@@ -163,47 +163,47 @@ jobs:
       env: BUILD=sniff
     - stage: test
       php: 7.2
-      env: WP_VERSION=latest
+      env: FP_VERSION=latest
     - stage: test
       php: 7.2
-      env: WP_VERSION=3.7.11
+      env: FP_VERSION=3.7.11
     - stage: test
       php: 7.2
-      env: WP_VERSION=trunk
+      env: FP_VERSION=trunk
 ```
 
-#### WP-CLI version
+#### FP-CLI version
 
-You can point the tests to a specific version of WP-CLI through the `WP_CLI_BIN_DIR` constant:
+You can point the tests to a specific version of FP-CLI through the `FP_CLI_BIN_DIR` constant:
 ```bash
-WP_CLI_BIN_DIR=~/my-custom-wp-cli/bin composer behat
+FP_CLI_BIN_DIR=~/my-custom-fp-cli/bin composer behat
 ```
 
-#### WordPress version
+#### FinPress version
 
-If you want to run the feature tests against a specific WordPress version, you can use the `WP_VERSION` constant:
+If you want to run the feature tests against a specific FinPress version, you can use the `FP_VERSION` constant:
 ```bash
-WP_VERSION=4.2 composer behat
+FP_VERSION=4.2 composer behat
 ```
 
-The `WP_VERSION` constant also understands the `latest` and `trunk` as valid version targets.
+The `FP_VERSION` constant also understands the `latest` and `trunk` as valid version targets.
 
 #### The database credentials
 
-By default, the tests are run in a database named `wp_cli_test` with the user also named `wp_cli_test` with password `password1`.
+By default, the tests are run in a database named `fp_cli_test` with the user also named `fp_cli_test` with password `password1`.
 This should be set up via the `composer prepare-tests` command.
 
 The following environment variables can be set to override the default database credentials.
 
-  - `WP_CLI_TEST_DBHOST` is the host to use and can include a port, i.e "127.0.0.1:33060" (defaults to "localhost")
-  - `WP_CLI_TEST_DBROOTUSER` is the user that has permission to administer databases and users (defaults to "root").
-  - `WP_CLI_TEST_DBROOTPASS` is the password to use for the above user (defaults to an empty password).
-  - `WP_CLI_TEST_DBNAME` is the database that the tests run under (defaults to "wp_cli_test").
-  - `WP_CLI_TEST_DBUSER` is the user that the tests run under (defaults to "wp_cli_test").
-  - `WP_CLI_TEST_DBPASS` is the password to use for the above user (defaults to "password1").
-  - `WP_CLI_TEST_DBTYPE` is the database engine type to use, i.e. "sqlite" for running tests on SQLite instead of MySQL (defaults to "mysql").
+  - `FP_CLI_TEST_DBHOST` is the host to use and can include a port, i.e "127.0.0.1:33060" (defaults to "localhost")
+  - `FP_CLI_TEST_DBROOTUSER` is the user that has permission to administer databases and users (defaults to "root").
+  - `FP_CLI_TEST_DBROOTPASS` is the password to use for the above user (defaults to an empty password).
+  - `FP_CLI_TEST_DBNAME` is the database that the tests run under (defaults to "fp_cli_test").
+  - `FP_CLI_TEST_DBUSER` is the user that the tests run under (defaults to "fp_cli_test").
+  - `FP_CLI_TEST_DBPASS` is the password to use for the above user (defaults to "password1").
+  - `FP_CLI_TEST_DBTYPE` is the database engine type to use, i.e. "sqlite" for running tests on SQLite instead of MySQL (defaults to "mysql").
 
-Environment variables can be set for the whole session via the following syntax: `export WP_CLI_TEST_DBNAME=custom_db`.
+Environment variables can be set for the whole session via the following syntax: `export FP_CLI_TEST_DBNAME=custom_db`.
 
-They can also be set for a single execution by prepending them before the Behat command: `WP_CLI_TEST_DBNAME=custom_db composer behat`.
+They can also be set for a single execution by prepending them before the Behat command: `FP_CLI_TEST_DBNAME=custom_db composer behat`.
 

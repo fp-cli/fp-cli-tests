@@ -8,19 +8,19 @@ parameters:
   excludePaths:
     - tests/data
   scanDirectories:
-    - vendor/wp-cli/wp-cli
+    - vendor/fp-cli/fp-cli
     - vendor/phpunit/php-code-coverage
     - vendor/behat/behat
   scanFiles:
     - tests/phpstan/scan-files.php
   treatPhpDocTypesAsCertain: false
   dynamicConstantNames:
-    - WP_DEBUG
-    - WP_DEBUG_LOG
-    - WP_DEBUG_DISPLAY
+    - FP_DEBUG
+    - FP_DEBUG_LOG
+    - FP_DEBUG_DISPLAY
   ignoreErrors:
-    # Needs fixing in WP-CLI.
-    - message: '#Parameter \#1 \$cmd of function WP_CLI\\Utils\\esc_cmd expects array<string>#'
+    # Needs fixing in FP-CLI.
+    - message: '#Parameter \#1 \$cmd of function FP_CLI\\Utils\\esc_cmd expects array<string>#'
     - message: '#Dynamic call to static method#'
       path: 'tests/tests'
   strictRules:

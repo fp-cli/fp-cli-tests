@@ -1,8 +1,8 @@
 <?php
 
-namespace WP_CLI\Tests\Context;
+namespace FP_CLI\Tests\Context;
 
-use WP_CLI\Process;
+use FP_CLI\Process;
 use Exception;
 
 trait WhenStepDefinitions {
@@ -12,7 +12,7 @@ trait WhenStepDefinitions {
 	 * @param string  $mode Mode, either 'run' or 'try'.
 	 * @return mixed
 	 */
-	public function wpcli_tests_invoke_proc( $proc, $mode ) {
+	public function fpcli_tests_invoke_proc( $proc, $mode ) {
 		$map    = array(
 			'run' => 'run_check_stderr',
 			'try' => 'run',
@@ -28,8 +28,8 @@ trait WhenStepDefinitions {
 	 * @param string $stdout
 	 * @return array{string, int}
 	 */
-	public function wpcli_tests_capture_email_sends( $stdout ): array {
-		$stdout = preg_replace( '#WP-CLI test suite: Sent email to.+\n?#', '', $stdout, -1, $email_sends );
+	public function fpcli_tests_capture_email_sends( $stdout ): array {
+		$stdout = preg_replace( '#FP-CLI test suite: Sent email to.+\n?#', '', $stdout, -1, $email_sends );
 
 		return array( $stdout, $email_sends );
 	}
@@ -39,8 +39,8 @@ trait WhenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a WP install
-	 *   And I launch in the background `wp server --host=localhost --port=8181`
+	 *   Given a FP install
+	 *   And I launch in the background `fp server --host=localhost --port=8181`
 	 *   ...
 	 * ```
 	 *
@@ -63,14 +63,14 @@ trait WhenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `wp core version`
+	 *   When I run `fp core version`
 	 *   Then STDOUT should contain:
 	 *     """
 	 *     6.8
 	 *     """
 	 *
 	 * Scenario: My other scenario
-	 *   When I try `wp i18n make-pot foo bar/baz.pot`
+	 *   When I try `fp i18n make-pot foo bar/baz.pot`
 	 *   Then STDERR should contain:
 	 *     """
 	 *     Error: Not a valid source directory.
@@ -87,8 +87,8 @@ trait WhenStepDefinitions {
 	 */
 	public function when_i_run( $mode, $cmd ): void {
 		$cmd          = $this->replace_variables( $cmd );
-		$this->result = $this->wpcli_tests_invoke_proc( $this->proc( $cmd ), $mode );
-		list( $this->result->stdout, $this->email_sends ) = $this->wpcli_tests_capture_email_sends( $this->result->stdout );
+		$this->result = $this->fpcli_tests_invoke_proc( $this->proc( $cmd ), $mode );
+		list( $this->result->stdout, $this->email_sends ) = $this->fpcli_tests_capture_email_sends( $this->result->stdout );
 	}
 
 	/**
@@ -98,10 +98,10 @@ trait WhenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `wp core is-installed`
+	 *   When I run `fp core is-installed`
 	 *   Then STDOUT should be empty
 	 *
-	 *   When I run `wp core is-installed` from 'foo/wp-content'
+	 *   When I run `fp core is-installed` from 'foo/fp-content'
 	 *   Then STDOUT should be empty
 	 * ```
 	 *
@@ -115,8 +115,8 @@ trait WhenStepDefinitions {
 	 */
 	public function when_i_run_from_a_subfolder( $mode, $cmd, $subdir ): void {
 		$cmd          = $this->replace_variables( $cmd );
-		$this->result = $this->wpcli_tests_invoke_proc( $this->proc( $cmd, array(), $subdir ), $mode );
-		list( $this->result->stdout, $this->email_sends ) = $this->wpcli_tests_capture_email_sends( $this->result->stdout );
+		$this->result = $this->fpcli_tests_invoke_proc( $this->proc( $cmd, array(), $subdir ), $mode );
+		list( $this->result->stdout, $this->email_sends ) = $this->fpcli_tests_capture_email_sends( $this->result->stdout );
 	}
 
 	/**
@@ -126,7 +126,7 @@ trait WhenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `wp site option update admin_user_id 1`
+	 *   When I run `fp site option update admin_user_id 1`
 	 *   Then STDOUT should contain:
 	 *     """
 	 *     Success: Updated 'admin_user_id' site option.
@@ -151,7 +151,7 @@ trait WhenStepDefinitions {
 		}
 
 		$proc         = Process::create( $this->result->command, $this->result->cwd, $this->result->env );
-		$this->result = $this->wpcli_tests_invoke_proc( $proc, $mode );
-		list( $this->result->stdout, $this->email_sends ) = $this->wpcli_tests_capture_email_sends( $this->result->stdout );
+		$this->result = $this->fpcli_tests_invoke_proc( $proc, $mode );
+		list( $this->result->stdout, $this->email_sends ) = $this->fpcli_tests_capture_email_sends( $this->result->stdout );
 	}
 }

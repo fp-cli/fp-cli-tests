@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Set return type of \WP_CLI\Utils\parse_url().
+ * Set return type of \FP_CLI\Utils\parse_url().
  *
  * Based on ParseUrlFunctionDynamicReturnTypeExtension in PHPStan itself
- * and WpParseUrlFunctionDynamicReturnTypeExtension in the PHPStan WordPress extension.
+ * and WpParseUrlFunctionDynamicReturnTypeExtension in the PHPStan FinPress extension.
  *
- * phpcs:disable WordPress.WP.AlternativeFunctions.parse_url_parse_url
+ * phpcs:disable FinPress.FP.AlternativeFunctions.parse_url_parse_url
  */
 
 declare(strict_types=1);
 
-namespace WP_CLI\Tests\PHPStan;
+namespace FP_CLI\Tests\PHPStan;
 
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
@@ -50,7 +50,7 @@ final class ParseUrlFunctionDynamicReturnTypeExtension implements \PHPStan\Type\
 	private $allComponentsTogetherType = null;
 
 	public function isFunctionSupported( FunctionReflection $functionReflection ): bool {
-		return $functionReflection->getName() === 'WP_CLI\Utils\parse_url';
+		return $functionReflection->getName() === 'FP_CLI\Utils\parse_url';
 	}
 
 	public function getTypeFromFunctionCall( FunctionReflection $functionReflection, FuncCall $functionCall, Scope $scope ): ?Type {

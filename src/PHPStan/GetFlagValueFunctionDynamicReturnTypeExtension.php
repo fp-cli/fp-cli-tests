@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Set return type of \WP_CLI\Utils\get_flag_value().
+ * Set return type of \FP_CLI\Utils\get_flag_value().
  */
 
 declare(strict_types=1);
 
-namespace WP_CLI\Tests\PHPStan;
+namespace FP_CLI\Tests\PHPStan;
 
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
@@ -22,7 +22,7 @@ use function count;
 final class GetFlagValueFunctionDynamicReturnTypeExtension implements \PHPStan\Type\DynamicFunctionReturnTypeExtension {
 
 	public function isFunctionSupported( FunctionReflection $functionReflection ): bool {
-		return $functionReflection->getName() === 'WP_CLI\Utils\get_flag_value';
+		return $functionReflection->getName() === 'FP_CLI\Utils\get_flag_value';
 	}
 
 	public function getTypeFromFunctionCall(

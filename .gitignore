@@ -1,10 +1,10 @@
 .DS_Store
-wp-cli.local.yml
+fp-cli.local.yml
 node_modules/
 vendor/
 *.zip
 *.tar.gz
-*.swp
+*.sfp
 *.txt
 *.log
 composer.lock

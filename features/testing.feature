@@ -1,33 +1,33 @@
-Feature: Test that WP-CLI loads.
+Feature: Test that FP-CLI loads.
 
-  Scenario: WP-CLI loads for your tests
-    Given a WP install
+  Scenario: FP-CLI loads for your tests
+    Given a FP install
 
-    When I run `wp eval 'echo "Hello world.";'`
+    When I run `fp eval 'echo "Hello world.";'`
     Then STDOUT should contain:
       """
       Hello world.
       """
 
-  Scenario: WP Cron is disabled by default
-    Given a WP install
+  Scenario: FP Cron is disabled by default
+    Given a FP install
     And a test_cron.php file:
       """
       <?php
-      $cron_disabled = defined( "DISABLE_WP_CRON" ) ? DISABLE_WP_CRON : false;
-      echo 'DISABLE_WP_CRON is: ' . ( $cron_disabled ? 'true' : 'false' );
+      $cron_disabled = defined( "DISABLE_FP_CRON" ) ? DISABLE_FP_CRON : false;
+      echo 'DISABLE_FP_CRON is: ' . ( $cron_disabled ? 'true' : 'false' );
       """
 
-    When I run `wp eval-file test_cron.php`
+    When I run `fp eval-file test_cron.php`
     Then STDOUT should be:
       """
-      DISABLE_WP_CRON is: true
+      DISABLE_FP_CRON is: true
       """
 
   @require-sqlite
   Scenario: Uses SQLite
-    Given a WP install
-    When I run `wp eval 'echo DB_ENGINE;'`
+    Given a FP install
+    When I run `fp eval 'echo DB_ENGINE;'`
     Then STDOUT should contain:
       """
       sqlite
@@ -35,19 +35,19 @@ Feature: Test that WP-CLI loads.
 
   @require-mysql
   Scenario: Uses MySQL
-    Given a WP install
-    When I run `wp eval 'var_export( defined("DB_ENGINE") );'`
+    Given a FP install
+    When I run `fp eval 'var_export( defined("DB_ENGINE") );'`
     Then STDOUT should be:
       """
       false
       """
 
   @require-sqlite
-  Scenario: Custom wp-content directory
-    Given a WP install
-    And a custom wp-content directory
+  Scenario: Custom fp-content directory
+    Given a FP install
+    And a custom fp-content directory
 
-    When I run `wp eval 'echo DB_ENGINE;'`
+    When I run `fp eval 'echo DB_ENGINE;'`
     Then STDOUT should contain:
       """
       sqlite
@@ -55,9 +55,9 @@ Feature: Test that WP-CLI loads.
 
   @require-sqlite
   Scenario: Composer installation
-    Given a WP install with Composer
+    Given a FP install with Composer
 
-    When I run `wp eval 'echo DB_ENGINE;'`
+    When I run `fp eval 'echo DB_ENGINE;'`
     Then STDOUT should contain:
       """
       sqlite
