@@ -1,11 +1,11 @@
 {
-    "name": "fp-cli/fp-cli-tests",
-    "description": "FP-CLI testing framework",
+    "name": "fin-cli/fin-cli-tests",
+    "description": "FIN-CLI testing framework",
     "keywords": [
         "cli",
         "finpress"
     ],
-    "homepage": "https://fp-cli.org",
+    "homepage": "https://fin-cli.org",
     "license": "MIT",
     "type": "phpcodesniffer-standard",
     "require": {
@@ -22,11 +22,11 @@
         "phpstan/phpstan-strict-rules": "^1.6",
         "swissspidy/phpstan-no-private": "^0.2.1",
         "szepeviktor/phpstan-finpress": "^v1.3.5",
-        "fp-cli/config-command": "^1 || ^2",
-        "fp-cli/core-command": "^1 || ^2",
-        "fp-cli/eval-command": "^1 || ^2",
-        "fp-cli/fp-cli": "^2.12",
-        "fp-coding-standards/fpcs": "^3",
+        "fin-cli/config-command": "^1 || ^2",
+        "fin-cli/core-command": "^1 || ^2",
+        "fin-cli/eval-command": "^1 || ^2",
+        "fin-cli/fin-cli": "^2.12",
+        "fin-coding-standards/fincs": "^3",
         "yoast/phpunit-polyfills": "^4.0.0"
     },
     "require-dev": {
@@ -64,12 +64,12 @@
     },
     "autoload": {
         "psr-4": {
-            "FP_CLI\\Tests\\": "src"
+            "FIN_CLI\\Tests\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "FP_CLI\\Tests\\Tests\\": "tests/tests"
+            "FIN_CLI\\Tests\\Tests\\": "tests/tests"
         }
     },
     "minimum-stability": "dev",
@@ -102,8 +102,8 @@
         ]
     },
     "support": {
-        "issues": "https://github.com/fp-cli/fp-cli-tests/issues",
-        "source": "https://github.com/fp-cli/fp-cli-tests",
+        "issues": "https://github.com/fin-cli/fin-cli-tests/issues",
+        "source": "https://github.com/fin-cli/fin-cli-tests",
         "docs": "https://make.finpress.org/cli/handbook/"
     }
 }

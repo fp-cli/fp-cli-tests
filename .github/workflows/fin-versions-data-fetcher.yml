@@ -1,5 +1,5 @@
 ---
-name: FP Versions Data Fetcher
+name: FIN Versions Data Fetcher
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       max_retries:
-        description: 'Max retries to fetch data from FPOrg API'
+        description: 'Max retries to fetch data from FINOrg API'
         default: 3
         required: false
         type: number
@@ -20,10 +20,10 @@ permissions: {}
 
 env:
   ARTIFACTS_BRANCH: 'artifacts'
-  FEATURE_BRANCH: 'sync-fp-versions'
-  FILE_PATH: 'fp-versions.json'
+  FEATURE_BRANCH: 'sync-fin-versions'
+  FILE_PATH: 'fin-versions.json'
   MAX_RETRIES: ${{ inputs.max_retries || 3 }}
-  FP_ORG_API_URL: 'https://api.finpress.org/core/stable-check/1.0/'
+  FIN_ORG_API_URL: 'https://api.finpress.org/core/stable-check/1.0/'
 
 jobs:
   fetch-versions:
@@ -55,20 +55,20 @@ jobs:
           git checkout ${{ env.FEATURE_BRANCH }}
           git pull --no-rebase
 
-      - name: Fetch FP Versions
+      - name: Fetch FIN Versions
         run: |
           BACKOFF=10
           for i in $(seq 1 $MAX_RETRIES); do
-            echo "Fetching FP versions, attempt $i"
-            RES_CODE=$(curl -sL -w "%{http_code}" $FP_ORG_API_URL -o /tmp/fp-versions.json)
+            echo "Fetching FIN versions, attempt $i"
+            RES_CODE=$(curl -sL -w "%{http_code}" $FIN_ORG_API_URL -o /tmp/fin-versions.json)
             if [ $RES_CODE -eq 200 ]; then
-              mv /tmp/fp-versions.json $FILE_PATH
-              echo "::notice::FP versions data has been fetched successfully."
+              mv /tmp/fin-versions.json $FILE_PATH
+              echo "::notice::FIN versions data has been fetched successfully."
               break
             fi
-            echo "Failed to fetch FP versions, attempt $i"
+            echo "Failed to fetch FIN versions, attempt $i"
             if [ $i -eq $MAX_RETRIES ]; then
-              echo "::error::Failed to fetch FP versions from $FP_ORG_API_URL after $MAX_RETRIES attempts"
+              echo "::error::Failed to fetch FIN versions from $FIN_ORG_API_URL after $MAX_RETRIES attempts"
               exit 1
             fi
             echo "Retrying in $BACKOFF seconds"
@@ -79,11 +79,11 @@ jobs:
       - name: Track modified files
         id: version-file
         run: |
-          IS_MODIFIED=$(git ls-files --modified fp-versions.json)
+          IS_MODIFIED=$(git ls-files --modified fin-versions.json)
           if [ -n "$IS_MODIFIED" ]; then
             DIFF=$(git diff ${{ env.ARTIFACTS_BRANCH }} -- $FILE_PATH)
-            echo "# Modified FP Versions Data" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>FP Versions Data Diff</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "# Modified FIN Versions Data" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>FIN Versions Data Diff</summary>" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`diff" >> $GITHUB_STEP_SUMMARY
             echo "$DIFF" >> $GITHUB_STEP_SUMMARY
@@ -91,7 +91,7 @@ jobs:
             echo "</details>" >> $GITHUB_STEP_SUMMARY
             echo "modified=true" >> $GITHUB_OUTPUT
           else
-            echo "::notice::FP versions data has not been modified."
+            echo "::notice::FIN versions data has not been modified."
             exit 0
           fi
 
@@ -102,7 +102,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit FP Versions Data
+      - name: Commit FIN Versions Data
         if: steps.version-file.outputs.modified == 'true'
         run: |
           git add $FILE_PATH
@@ -116,11 +116,11 @@ jobs:
       - name: Create Pull Request
         run: |
           body="## Summary
-          Update FP versions data file with the \`${FP_ORG_API_URL}\` endpoint response."
+          Update FIN versions data file with the \`${FIN_ORG_API_URL}\` endpoint response."
           delimiter="${body//$'\n'/'%0A'}"
           echo "body<<${delimiter}" >> $GITHUB_OUTPUT
           echo "$body" >> $GITHUB_OUTPUT
           echo "${delimiter}" >> $GITHUB_OUTPUT
-          gh pr create --base ${{ env.ARTIFACTS_BRANCH }} --head ${{ env.FEATURE_BRANCH }} --title "Update FP Versions Data" --body "$body" --label "scope:artifacts" || true
+          gh pr create --base ${{ env.ARTIFACTS_BRANCH }} --head ${{ env.FEATURE_BRANCH }} --title "Update FIN Versions Data" --body "$body" --label "scope:artifacts" || true
         env:
           GH_TOKEN: ${{ github.token }}

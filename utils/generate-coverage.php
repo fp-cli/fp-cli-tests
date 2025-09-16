@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This script is added via the `FP_CLI_REQUIRE` environment variable to the FP-CLI commands executed by the Behat test runner.
+ * This script is added via the `FIN_CLI_REQUIRE` environment variable to the FIN-CLI commands executed by the Behat test runner.
  * It starts coverage collection right away and registers a shutdown hook to complete it
- * after the respective FP-CLI command has finished.
+ * after the respective FIN-CLI command has finished.
  */
 
 use SebastianBergmann\CodeCoverage\CodeCoverage;
@@ -23,7 +23,7 @@ $name      = "{$feature} - {$scenario} - {$step_line}";
 
 /*
  * Do not run coverage if they are empty, which means we are running some command
- * during test preparation, e.g. the `fp core download` in `FeatureContext::prepare()`.
+ * during test preparation, e.g. the `fin core download` in `FeatureContext::prepare()`.
  */
 if ( empty( $feature ) | empty( $scenario ) ) {
 	return;
@@ -95,7 +95,7 @@ register_shutdown_function(
 
 		$feature_suffix  = preg_replace( '/[^a-z0-9]+/', '-', strtolower( $feature ) );
 		$scenario_suffix = preg_replace( '/[^a-z0-9]+/', '-', strtolower( $scenario ) );
-		$db_type         = strtolower( getenv( 'FP_CLI_TEST_DBTYPE' ) );
+		$db_type         = strtolower( getenv( 'FIN_CLI_TEST_DBTYPE' ) );
 		$destination     = "$project_dir/build/logs/$feature_suffix-$scenario_suffix-$step_line-$db_type.cov";
 
 		$dir = dirname( $destination );

@@ -1,14 +1,14 @@
 services:
   -
-    class: FP_CLI\Tests\PHPStan\ParseUrlFunctionDynamicReturnTypeExtension
+    class: FIN_CLI\Tests\PHPStan\ParseUrlFunctionDynamicReturnTypeExtension
     tags:
       - phpstan.broker.dynamicFunctionReturnTypeExtension
   -
-    class: FP_CLI\Tests\PHPStan\GetFlagValueFunctionDynamicReturnTypeExtension
+    class: FIN_CLI\Tests\PHPStan\GetFlagValueFunctionDynamicReturnTypeExtension
     tags:
       - phpstan.broker.dynamicFunctionReturnTypeExtension
   -
-    class: FP_CLI\Tests\PHPStan\FPCliRuncommandDynamicReturnTypeExtension
+    class: FIN_CLI\Tests\PHPStan\FINCliRuncommandDynamicReturnTypeExtension
     tags:
       - phpstan.broker.dynamicStaticMethodReturnTypeExtension
 parameters:

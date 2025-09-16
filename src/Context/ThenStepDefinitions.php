@@ -1,6 +1,6 @@
 <?php
 
-namespace FP_CLI\Tests\Context;
+namespace FIN_CLI\Tests\Context;
 
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
@@ -17,8 +17,8 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
-	 *   When I try `fp plugin install`
+	 *   Given a FIN installation
+	 *   When I try `fin plugin install`
 	 *   Then the return code should be 1
 	 * ```
 	 *
@@ -44,12 +44,12 @@ trait ThenStepDefinitions {
 	 * ```
 	 * Scenario: My example scenario
 	 *   Given an empty directory
-	 *   When I run `fp core is-installed`
+	 *   When I run `fin core is-installed`
 	 *   Then STDOUT should be empty
 	 *
 	 * Scenario: My other scenario
-	 *   Given a FP install
-	 *   When I run `fp plugin install akismet`
+	 *   Given a FIN install
+	 *   When I run `fin plugin install akismet`
 	 *   Then STDOUT should contain:
 	 *     """
 	 *     Plugin installed successfully.
@@ -80,8 +80,8 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
-	 *   When I run `fp db size --size_format=b`
+	 *   Given a FIN installation
+	 *   When I run `fin db size --size_format=b`
 	 *   Then STDOUT should be a number
 	 * ```
 	 *
@@ -103,8 +103,8 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
-	 *   When I run `fp post list --format=json`
+	 *   Given a FIN installation
+	 *   When I run `fin post list --format=json`
 	 *   Then STDOUT should not be a number
 	 * ```
 	 *
@@ -126,8 +126,8 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
-	 *   When I run `fp config list --fields=name,type`
+	 *   Given a FIN installation
+	 *   When I run `fin config list --fields=name,type`
 	 *   Then STDOUT should be a table containing rows:
 	 *     | name    | type     |
 	 *     | DB_NAME | constant |
@@ -157,17 +157,17 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
-	 *   When I run `fp search-replace foo bar --report-changed-only`
+	 *   Given a FIN installation
+	 *   When I run `fin search-replace foo bar --report-changed-only`
 	 *   Then STDOUT should contain:
 	 *     """
 	 *     Success: Made 3 replacements.
 	 *     """
 	 *   And STDOUT should end with a table containing rows:
 	 *     | Table       | Column       | Replacements | Type |
-	 *     | fp_options  | option_value | 1            | PHP  |
-	 *     | fp_postmeta | meta_value   | 1            | SQL  |
-	 *     | fp_posts    | post_title   | 1            | SQL  |
+	 *     | fin_options  | option_value | 1            | PHP  |
+	 *     | fin_postmeta | meta_value   | 1            | SQL  |
+	 *     | fin_posts    | post_title   | 1            | SQL  |
 	 * ```
 	 *
 	 * @access public
@@ -197,7 +197,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp post meta get 1 meta-key --format=json`
+	 *   When I run `fin post meta get 1 meta-key --format=json`
 	 *   Then STDOUT should be JSON containing:
 	 *     """
 	 *     {
@@ -226,7 +226,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp plugin list --field=name --format=json`
+	 *   When I run `fin plugin list --field=name --format=json`
 	 *   Then STDOUT should be a JSON array containing:
 	 *     """
 	 *     ["akismet", "hello-dolly"]
@@ -255,7 +255,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp term list post_tag --fields=name,slug --format=csv`
+	 *   When I run `fin term list post_tag --fields=name,slug --format=csv`
 	 *   Then STDOUT should be CSV containing:
 	 *     | name      | slug |
 	 *     | Test term | test |
@@ -285,7 +285,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp cli alias list`
+	 *   When I run `fin cli alias list`
 	 *   Then STDOUT should be YAML containing:
 	 *     """
 	 *     @all: Run command against every registered alias.
@@ -312,8 +312,8 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My other scenario
-	 *   Given a FP install
-	 *   When I run `fp plugin install akismet`
+	 *   Given a FIN install
+	 *   When I run `fin plugin install akismet`
 	 *   Then STDERR should be empty
 	 * ```
 	 *
@@ -337,7 +337,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp user create examplejane jane@example.com`
+	 *   When I run `fin user create examplejane jane@example.com`
 	 *   Then STDOUT should not be empty
 	 * ```
 	 *
@@ -361,8 +361,8 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP install
-	 *   When I run `fp core version
+	 *   Given a FIN install
+	 *   When I run `fin core version
 	 *   Then STDOUT should be a version string >= 6.8
 	 * ```
 	 *
@@ -387,15 +387,15 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp core download`
-	 *   Then the fp-settings.php file should exist
-	 *   And the fp-content directory should exist
+	 *   When I run `fin core download`
+	 *   Then the fin-settings.php file should exist
+	 *   And the fin-content directory should exist
 	 *   And the {RUN_DIR} directory should contain:
 	 *     """
 	 *     index.php
 	 *     license.txt
 	 *     """
-	 *   And the fp-config.php file should contain:
+	 *   And the fin-config.php file should contain:
 	 *     """
 	 *     That's all, stop editing! Happy publishing.
 	 *     """
@@ -468,8 +468,8 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp scaffold plugin hello-world`
-	 *   Then the contents of the fp-content/plugins/hello-world/languages/hello-world.pot file should match /X-Generator:\s/
+	 *   When I run `fin scaffold plugin hello-world`
+	 *   Then the contents of the fin-content/plugins/hello-world/languages/hello-world.pot file should match /X-Generator:\s/
 	 * ```
 	 *
 	 * @access public
@@ -501,7 +501,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp dist-archive fp-content/plugins/hello-world`
+	 *   When I run `fin dist-archive fin-content/plugins/hello-world`
 	 *   Then STDOUT should match /^Success: Created hello-world.0.1.0.zip \(Size: \d+(?:\.\d*)? [a-zA-Z]{1,3}\)$/
 	 * ```
 	 *
@@ -529,7 +529,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp user reset-password 1`
+	 *   When I run `fin user reset-password 1`
 	 *   Then an email should be sent
 	 * ```
 	 *
@@ -554,7 +554,7 @@ trait ThenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation with Composer
+	 *   Given a FIN installation with Composer
 	 *   And a PHP built-in web server to serve 'FinPress'
 	 *   Then the HTTP status code should be 200
 	 * ```

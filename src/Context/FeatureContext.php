@@ -1,6 +1,6 @@
 <?php
 
-namespace FP_CLI\Tests\Context;
+namespace FIN_CLI\Tests\Context;
 
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Behat\EventDispatcher\Event\OutlineTested;
@@ -21,12 +21,12 @@ use SebastianBergmann\CodeCoverage\Filter;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\Environment\Runtime;
 use RuntimeException;
-use FP_CLI;
+use FIN_CLI;
 use DirectoryIterator;
-use FP_CLI\Process;
-use FP_CLI\ProcessRun;
-use FP_CLI\Utils;
-use FP_CLI\WpOrgApi;
+use FIN_CLI\Process;
+use FIN_CLI\ProcessRun;
+use FIN_CLI\Utils;
+use FIN_CLI\WpOrgApi;
 
 /**
  * Features context.
@@ -54,7 +54,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	protected $email_sends;
 
 	/**
-	 * The current working directory for scenarios that have a "Given a FP installation" or "Given an empty directory" step. Variable RUN_DIR. Lives until the end of the scenario.
+	 * The current working directory for scenarios that have a "Given a FIN installation" or "Given an empty directory" step. Variable RUN_DIR. Lives until the end of the scenario.
 	 *
 	 * @var ?string
 	 */
@@ -68,28 +68,28 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $behat_run_dir;
 
 	/**
-	 * Where FinPress core is downloaded to for caching, and which is copied to RUN_DIR during a "Given a FP installation" step. Lives until manually deleted.
+	 * Where FinPress core is downloaded to for caching, and which is copied to RUN_DIR during a "Given a FIN installation" step. Lives until manually deleted.
 	 *
 	 * @var string
 	 */
 	private static $cache_dir;
 
 	/**
-	 * The directory that holds the install cache, and which is copied to RUN_DIR during a "Given a FP installation" step. Recreated on each suite run.
+	 * The directory that holds the install cache, and which is copied to RUN_DIR during a "Given a FIN installation" step. Recreated on each suite run.
 	 *
 	 * @var string
 	 */
 	private static $install_cache_dir;
 
 	/**
-	 * The directory that holds a copy of the sqlite-database-integration plugin, and which is copied to RUN_DIR during a "Given a FP installation" step. Lives until manually deleted.
+	 * The directory that holds a copy of the sqlite-database-integration plugin, and which is copied to RUN_DIR during a "Given a FIN installation" step. Lives until manually deleted.
 	 *
 	 * @var ?string
 	 */
 	private static $sqlite_cache_dir;
 
 	/**
-	 * The directory that the FP-CLI cache (FP_CLI_CACHE_DIR, normally "$HOME/.fp-cli/cache") is set to on a "Given an empty cache" step.
+	 * The directory that the FIN-CLI cache (FIN_CLI_CACHE_DIR, normally "$HOME/.fin-cli/cache") is set to on a "Given an empty cache" step.
 	 * Variable SUITE_CACHE_DIR. Lives until the end of the scenario (or until another "Given an empty cache" step within the scenario).
 	 *
 	 * @var ?string
@@ -97,7 +97,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $suite_cache_dir;
 
 	/**
-	 * Where the current FP-CLI source repository is copied to for Composer-based tests with a "Given a dependency on current fp-cli" step.
+	 * Where the current FIN-CLI source repository is copied to for Composer-based tests with a "Given a dependency on current fin-cli" step.
 	 * Variable COMPOSER_LOCAL_REPOSITORY. Lives until the end of the suite.
 	 *
 	 * @var ?string
@@ -105,13 +105,13 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $composer_local_repository;
 
 	/**
-	 * The test database settings. All but `dbname` can be set via environment variables. The database is dropped at the start of each scenario and created on a "Given a FP installation" step.
+	 * The test database settings. All but `dbname` can be set via environment variables. The database is dropped at the start of each scenario and created on a "Given a FIN installation" step.
 	 *
 	 * @var array<string, string>
 	 */
 	private static $db_settings = [
-		'dbname' => 'fp_cli_test',
-		'dbuser' => 'fp_cli_test',
+		'dbname' => 'fin_cli_test',
+		'dbuser' => 'fin_cli_test',
 		'dbpass' => 'password1',
 		'dbhost' => '127.0.0.1',
 	];
@@ -138,8 +138,8 @@ class FeatureContext implements SnippetAcceptingContext {
 	private $running_procs = [];
 
 	/**
-	 * Array of variables available as {VARIABLE_NAME}. Some are always set: CORE_CONFIG_SETTINGS, DB_USER, DB_PASSWORD, DB_HOST, SRC_DIR, CACHE_DIR, FP_VERSION-version-latest.
-	 * Some are step-dependent: RUN_DIR, SUITE_CACHE_DIR, COMPOSER_LOCAL_REPOSITORY, PHAR_PATH. One is set on use: INVOKE_FP_CLI_WITH_PHP_ARGS-args.
+	 * Array of variables available as {VARIABLE_NAME}. Some are always set: CORE_CONFIG_SETTINGS, DB_USER, DB_PASSWORD, DB_HOST, SRC_DIR, CACHE_DIR, FIN_VERSION-version-latest.
+	 * Some are step-dependent: RUN_DIR, SUITE_CACHE_DIR, COMPOSER_LOCAL_REPOSITORY, PHAR_PATH. One is set on use: INVOKE_FIN_CLI_WITH_PHP_ARGS-args.
 	 * Scenarios can define their own variables using "Given save" steps. Variables are reset for each scenario.
 	 *
 	 * @var array<string, string>
@@ -154,7 +154,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	private static $temp_dir_infix;
 
 	/**
-	 * Whether to log run times - FP_CLI_TEST_LOG_RUN_TIMES env var. Set on `@BeforeScenario'.
+	 * Whether to log run times - FIN_CLI_TEST_LOG_RUN_TIMES env var. Set on `@BeforeScenario'.
 	 *
 	 * @var false|string
 	 */
@@ -277,7 +277,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * @return bool
 	 */
 	private static function running_with_code_coverage() {
-		$with_code_coverage = (string) getenv( 'FP_CLI_TEST_COVERAGE' );
+		$with_code_coverage = (string) getenv( 'FIN_CLI_TEST_COVERAGE' );
 
 		return \in_array( $with_code_coverage, [ 'true', '1' ], true );
 	}
@@ -323,11 +323,11 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		// We try to detect the vendor folder in the most probable locations.
 		$vendor_locations = [
-			// fp-cli/fp-cli-tests is a dependency of the current working dir.
+			// fin-cli/fin-cli-tests is a dependency of the current working dir.
 			getcwd() . '/vendor',
-			// fp-cli/fp-cli-tests is the root project.
+			// fin-cli/fin-cli-tests is the root project.
 			dirname( __DIR__, 2 ) . '/vendor',
-			// fp-cli/fp-cli-tests is a dependency.
+			// fin-cli/fin-cli-tests is a dependency.
 			dirname( __DIR__, 4 ),
 		];
 
@@ -347,9 +347,9 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Get the path to the FP-CLI framework folder.
+	 * Get the path to the FIN-CLI framework folder.
 	 *
-	 * @return string Absolute path to the FP-CLI framework folder.
+	 * @return string Absolute path to the FIN-CLI framework folder.
 	 */
 	public static function get_framework_dir(): ?string {
 		static $framework_folder = null;
@@ -360,12 +360,12 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		$vendor_folder = self::get_vendor_dir();
 
-		// Now we need to detect the location of fp-cli/fp-cli package.
+		// Now we need to detect the location of fin-cli/fin-cli package.
 		$framework_locations = [
-			// fp-cli/fp-cli is the root project.
+			// fin-cli/fin-cli is the root project.
 			dirname( $vendor_folder ),
-			// fp-cli/fp-cli is a dependency.
-			"{$vendor_folder}/fp-cli/fp-cli",
+			// fin-cli/fin-cli is a dependency.
+			"{$vendor_folder}/fin-cli/fin-cli",
 		];
 
 		$framework_folder = '';
@@ -384,9 +384,9 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Get the path to the FP-CLI binary.
+	 * Get the path to the FIN-CLI binary.
 	 *
-	 * @return string Absolute path to the FP-CLI binary.
+	 * @return string Absolute path to the FIN-CLI binary.
 	 */
 	public static function get_bin_path(): ?string {
 		static $bin_path = null;
@@ -395,7 +395,7 @@ class FeatureContext implements SnippetAcceptingContext {
 			return $bin_path;
 		}
 
-		$bin_path = getenv( 'FP_CLI_BIN_DIR' );
+		$bin_path = getenv( 'FIN_CLI_BIN_DIR' );
 
 		if ( ! empty( $bin_path ) ) {
 			return $bin_path;
@@ -407,7 +407,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		];
 
 		foreach ( $bin_paths as $path ) {
-			if ( is_file( "{$path}/fp" ) && is_executable( "{$path}/fp" ) ) {
+			if ( is_file( "{$path}/fin" ) && is_executable( "{$path}/fin" ) ) {
 				$bin_path = $path;
 				break;
 			}
@@ -417,7 +417,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Get the environment variables required for launched `fp` processes.
+	 * Get the environment variables required for launched `fin` processes.
 	 *
 	 * @return array<string, string|int>
 	 */
@@ -428,23 +428,23 @@ class FeatureContext implements SnippetAcceptingContext {
 			return $env;
 		}
 
-		// Ensure we're using the expected `fp` binary.
+		// Ensure we're using the expected `fin` binary.
 		$bin_path = self::get_bin_path();
-		fp_cli_behat_env_debug( "FP-CLI binary path: {$bin_path}" );
+		fin_cli_behat_env_debug( "FIN-CLI binary path: {$bin_path}" );
 
-		if ( ! file_exists( "{$bin_path}/fp" ) ) {
-			fp_cli_behat_env_debug( "WARNING: No file named 'fp' found in the provided/detected binary path." );
+		if ( ! file_exists( "{$bin_path}/fin" ) ) {
+			fin_cli_behat_env_debug( "WARNING: No file named 'fin' found in the provided/detected binary path." );
 		}
 
-		if ( ! is_executable( "{$bin_path}/fp" ) ) {
-			fp_cli_behat_env_debug( "WARNING: File named 'fp' found in the provided/detected binary path is not executable." );
+		if ( ! is_executable( "{$bin_path}/fin" ) ) {
+			fin_cli_behat_env_debug( "WARNING: File named 'fin' found in the provided/detected binary path is not executable." );
 		}
 
 		$path_separator = Utils\is_windows() ? ';' : ':';
 		$env            = [
 			'PATH'         => $bin_path . $path_separator . getenv( 'PATH' ),
 			'BEHAT_RUN'    => 1,
-			'HOME'         => sys_get_temp_dir() . '/fp-cli-home',
+			'HOME'         => sys_get_temp_dir() . '/fin-cli-home',
 			'TEST_RUN_DIR' => self::$behat_run_dir,
 		];
 
@@ -455,25 +455,25 @@ class FeatureContext implements SnippetAcceptingContext {
 				throw new RuntimeException( 'No coverage driver available. Re-run script with `--xdebug` flag, i.e. `composer behat -- --xdebug`.' );
 			}
 
-			$coverage_require_file = self::$behat_run_dir . '/vendor/fp-cli/fp-cli-tests/utils/generate-coverage.php';
+			$coverage_require_file = self::$behat_run_dir . '/vendor/fin-cli/fin-cli-tests/utils/generate-coverage.php';
 			if ( ! file_exists( $coverage_require_file ) ) {
-				// This file is not vendored inside the fp-cli-tests project
+				// This file is not vendored inside the fin-cli-tests project
 				$coverage_require_file = self::$behat_run_dir . '/utils/generate-coverage.php';
 			}
 
-			$current               = getenv( 'FP_CLI_REQUIRE' );
+			$current               = getenv( 'FIN_CLI_REQUIRE' );
 			$updated               = $current ? "{$current},{$coverage_require_file}" : $coverage_require_file;
-			$env['FP_CLI_REQUIRE'] = $updated;
+			$env['FIN_CLI_REQUIRE'] = $updated;
 		}
 
-		$config_path = getenv( 'FP_CLI_CONFIG_PATH' );
+		$config_path = getenv( 'FIN_CLI_CONFIG_PATH' );
 		if ( false !== $config_path ) {
-			$env['FP_CLI_CONFIG_PATH'] = $config_path;
+			$env['FIN_CLI_CONFIG_PATH'] = $config_path;
 		}
 
-		$allow_root = getenv( 'FP_CLI_ALLOW_ROOT' );
+		$allow_root = getenv( 'FIN_CLI_ALLOW_ROOT' );
 		if ( false !== $allow_root ) {
-			$env['FP_CLI_ALLOW_ROOT'] = $allow_root;
+			$env['FIN_CLI_ALLOW_ROOT'] = $allow_root;
 		}
 
 		$term = getenv( 'TERM' );
@@ -481,19 +481,19 @@ class FeatureContext implements SnippetAcceptingContext {
 			$env['TERM'] = $term;
 		}
 
-		$php_args = getenv( 'FP_CLI_PHP_ARGS' );
+		$php_args = getenv( 'FIN_CLI_PHP_ARGS' );
 		if ( false !== $php_args ) {
-			$env['FP_CLI_PHP_ARGS'] = $php_args;
+			$env['FIN_CLI_PHP_ARGS'] = $php_args;
 		}
 
-		$php_used = getenv( 'FP_CLI_PHP_USED' );
+		$php_used = getenv( 'FIN_CLI_PHP_USED' );
 		if ( false !== $php_used ) {
-			$env['FP_CLI_PHP_USED'] = $php_used;
+			$env['FIN_CLI_PHP_USED'] = $php_used;
 		}
 
-		$php = getenv( 'FP_CLI_PHP' );
+		$php = getenv( 'FIN_CLI_PHP' );
 		if ( false !== $php ) {
-			$env['FP_CLI_PHP'] = $php;
+			$env['FIN_CLI_PHP'] = $php;
 		}
 
 		$travis_build_dir = getenv( 'TRAVIS_BUILD_DIR' );
@@ -502,9 +502,9 @@ class FeatureContext implements SnippetAcceptingContext {
 		}
 
 		// Dump environment for debugging purposes, but before adding the GitHub token.
-		fp_cli_behat_env_debug( 'Environment:' );
+		fin_cli_behat_env_debug( 'Environment:' );
 		foreach ( $env as $key => $value ) {
-			fp_cli_behat_env_debug( "   [{$key}] => {$value}" );
+			fin_cli_behat_env_debug( "   [{$key}] => {$value}" );
 		}
 
 		$github_token = getenv( 'GITHUB_TOKEN' );
@@ -529,9 +529,9 @@ class FeatureContext implements SnippetAcceptingContext {
 		}
 
 		$paths = [
-			dirname( __DIR__, 4 ) . '/fp-cli/fp-cli/VERSION',
+			dirname( __DIR__, 4 ) . '/fin-cli/fin-cli/VERSION',
 			dirname( __DIR__, 5 ) . '/VERSION',
-			dirname( __DIR__, 2 ) . '/vendor/fp-cli/fp-cli/VERSION',
+			dirname( __DIR__, 2 ) . '/vendor/fin-cli/fin-cli/VERSION',
 		];
 
 		$framework_root = dirname( __DIR__, 2 );
@@ -597,8 +597,8 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * @param string $dir
 	 */
 	private static function configure_sqlite( $dir ): void {
-		$db_copy   = $dir . '/fp-content/mu-plugins/sqlite-database-integration/db.copy';
-		$db_dropin = $dir . '/fp-content/db.php';
+		$db_copy   = $dir . '/fin-content/mu-plugins/sqlite-database-integration/db.copy';
+		$db_dropin = $dir . '/fin-content/db.php';
 
 		/* similar to https://github.com/FinPress/sqlite-database-integration/blob/3306576c9b606bc23bbb26c15383fef08e03ab11/activate.php#L95 */
 		$file_contents = str_replace(
@@ -619,28 +619,28 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * We cache the results of `fp core download` to improve test performance.
+	 * We cache the results of `fin core download` to improve test performance.
 	 * Ideally, we'd cache at the HTTP layer for more reliable tests.
 	 */
-	private static function cache_fp_files(): void {
-		$fp_version             = getenv( 'FP_VERSION' );
-		$fp_version_suffix      = ( false !== $fp_version ) ? "-$fp_version" : '';
-		self::$cache_dir        = sys_get_temp_dir() . '/fp-cli-test-core-download-cache' . $fp_version_suffix;
-		self::$sqlite_cache_dir = sys_get_temp_dir() . '/fp-cli-test-sqlite-integration-cache';
+	private static function cache_fin_files(): void {
+		$fin_version             = getenv( 'FIN_VERSION' );
+		$fin_version_suffix      = ( false !== $fin_version ) ? "-$fin_version" : '';
+		self::$cache_dir        = sys_get_temp_dir() . '/fin-cli-test-core-download-cache' . $fin_version_suffix;
+		self::$sqlite_cache_dir = sys_get_temp_dir() . '/fin-cli-test-sqlite-integration-cache';
 
-		if ( 'sqlite' === getenv( 'FP_CLI_TEST_DBTYPE' ) ) {
+		if ( 'sqlite' === getenv( 'FIN_CLI_TEST_DBTYPE' ) ) {
 			if ( ! is_readable( self::$sqlite_cache_dir . '/sqlite-database-integration/db.copy' ) ) {
 				self::download_sqlite_plugin( self::$sqlite_cache_dir );
 			}
 		}
 
-		if ( is_readable( self::$cache_dir . '/fp-config-sample.php' ) ) {
+		if ( is_readable( self::$cache_dir . '/fin-config-sample.php' ) ) {
 			return;
 		}
 
-		$cmd = Utils\esc_cmd( 'fp core download --force --path=%s', self::$cache_dir );
-		if ( $fp_version ) {
-			$cmd .= Utils\esc_cmd( ' --version=%s', $fp_version );
+		$cmd = Utils\esc_cmd( 'fin core download --force --path=%s', self::$cache_dir );
+		if ( $fin_version ) {
+			$cmd .= Utils\esc_cmd( ' --version=%s', $fin_version );
 		}
 		Process::create( $cmd, null, self::get_process_env_variables() )->run_check();
 	}
@@ -650,33 +650,33 @@ class FeatureContext implements SnippetAcceptingContext {
 	 */
 	public static function prepare( BeforeSuiteScope $scope ): void {
 		// Test performance statistics - useful for detecting slow tests.
-		self::$log_run_times = getenv( 'FP_CLI_TEST_LOG_RUN_TIMES' );
+		self::$log_run_times = getenv( 'FIN_CLI_TEST_LOG_RUN_TIMES' );
 		if ( false !== self::$log_run_times ) {
 			self::log_run_times_before_suite( $scope );
 		}
 		self::$behat_run_dir = getcwd();
 		self::$mysql_binary  = Utils\get_mysql_binary_path();
 
-		$result = Process::create( 'fp cli info', null, self::get_process_env_variables() )->run_check();
+		$result = Process::create( 'fin cli info', null, self::get_process_env_variables() )->run_check();
 		echo "{$result->stdout}\n";
 
-		self::cache_fp_files();
+		self::cache_fin_files();
 
-		$result = Process::create( Utils\esc_cmd( 'fp core version --debug --path=%s', self::$cache_dir ), null, self::get_process_env_variables() )->run_check();
+		$result = Process::create( Utils\esc_cmd( 'fin core version --debug --path=%s', self::$cache_dir ), null, self::get_process_env_variables() )->run_check();
 		echo "[Debug messages]\n";
 		echo "{$result->stderr}\n";
 
 		echo "FinPress {$result->stdout}\n";
 
 		// Remove install cache if any (not setting the static var).
-		$fp_version        = getenv( 'FP_VERSION' );
-		$fp_version_suffix = ( false !== $fp_version ) ? "-$fp_version" : '';
-		$install_cache_dir = sys_get_temp_dir() . '/fp-cli-test-core-install-cache' . $fp_version_suffix;
+		$fin_version        = getenv( 'FIN_VERSION' );
+		$fin_version_suffix = ( false !== $fin_version ) ? "-$fin_version" : '';
+		$install_cache_dir = sys_get_temp_dir() . '/fin-cli-test-core-install-cache' . $fin_version_suffix;
 		if ( file_exists( $install_cache_dir ) ) {
 			self::remove_dir( $install_cache_dir );
 		}
 
-		if ( getenv( 'FP_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
+		if ( getenv( 'FIN_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
 			exit;
 		}
 	}
@@ -727,14 +727,14 @@ class FeatureContext implements SnippetAcceptingContext {
 	public function afterScenario( AfterScenarioScope $scope ): void {
 
 		if ( self::$run_dir ) {
-			// Remove altered FP install, unless there's an error.
+			// Remove altered FIN install, unless there's an error.
 			if ( $scope->getTestResult()->getResultCode() <= 10 ) {
 				self::remove_dir( self::$run_dir );
 			}
 			self::$run_dir = null;
 		}
 
-		// Remove FP-CLI package directory if any. Set to `fp package path` by package-command and scaffold-package-command features, and by cli-info.feature.
+		// Remove FIN-CLI package directory if any. Set to `fin package path` by package-command and scaffold-package-command features, and by cli-info.feature.
 		if ( isset( $this->variables['PACKAGE_PATH'] ) ) {
 			self::remove_dir( $this->variables['PACKAGE_PATH'] );
 		}
@@ -747,8 +747,8 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		// Remove global config file if any.
 		$env = self::get_process_env_variables();
-		if ( isset( $env['HOME'] ) && file_exists( "{$env['HOME']}/.fp-cli/config.yml" ) ) {
-			unlink( "{$env['HOME']}/.fp-cli/config.yml" );
+		if ( isset( $env['HOME'] ) && file_exists( "{$env['HOME']}/.fin-cli/config.yml" ) ) {
+			unlink( "{$env['HOME']}/.fin-cli/config.yml" );
 		}
 
 		// Remove any background processes.
@@ -792,13 +792,13 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Create a temporary FP_CLI_CACHE_DIR. Exposed as SUITE_CACHE_DIR in "Given an empty cache" step.
+	 * Create a temporary FIN_CLI_CACHE_DIR. Exposed as SUITE_CACHE_DIR in "Given an empty cache" step.
 	 */
 	public static function create_cache_dir(): string {
 		if ( self::$suite_cache_dir ) {
 			self::remove_dir( self::$suite_cache_dir );
 		}
-		self::$suite_cache_dir = sys_get_temp_dir() . '/' . uniqid( 'fp-cli-test-suite-cache-' . self::$temp_dir_infix . '-', true );
+		self::$suite_cache_dir = sys_get_temp_dir() . '/' . uniqid( 'fin-cli-test-suite-cache-' . self::$temp_dir_infix . '-', true );
 		mkdir( self::$suite_cache_dir );
 		return self::$suite_cache_dir;
 	}
@@ -808,40 +808,40 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * Every scenario gets its own context object.
 	 */
 	public function __construct() {
-		if ( getenv( 'FP_CLI_TEST_DBROOTUSER' ) ) {
-			$this->variables['DB_ROOT_USER'] = getenv( 'FP_CLI_TEST_DBROOTUSER' );
+		if ( getenv( 'FIN_CLI_TEST_DBROOTUSER' ) ) {
+			$this->variables['DB_ROOT_USER'] = getenv( 'FIN_CLI_TEST_DBROOTUSER' );
 		}
 
-		if ( false !== getenv( 'FP_CLI_TEST_DBROOTPASS' ) ) {
-			$this->variables['DB_ROOT_PASSWORD'] = getenv( 'FP_CLI_TEST_DBROOTPASS' );
+		if ( false !== getenv( 'FIN_CLI_TEST_DBROOTPASS' ) ) {
+			$this->variables['DB_ROOT_PASSWORD'] = getenv( 'FIN_CLI_TEST_DBROOTPASS' );
 		}
 
-		if ( getenv( 'FP_CLI_TEST_DBNAME' ) ) {
-			$this->variables['DB_NAME'] = getenv( 'FP_CLI_TEST_DBNAME' );
+		if ( getenv( 'FIN_CLI_TEST_DBNAME' ) ) {
+			$this->variables['DB_NAME'] = getenv( 'FIN_CLI_TEST_DBNAME' );
 		} else {
-			$this->variables['DB_NAME'] = 'fp_cli_test';
+			$this->variables['DB_NAME'] = 'fin_cli_test';
 		}
 
-		if ( getenv( 'FP_CLI_TEST_DBUSER' ) ) {
-			$this->variables['DB_USER'] = getenv( 'FP_CLI_TEST_DBUSER' );
+		if ( getenv( 'FIN_CLI_TEST_DBUSER' ) ) {
+			$this->variables['DB_USER'] = getenv( 'FIN_CLI_TEST_DBUSER' );
 		} else {
-			$this->variables['DB_USER'] = 'fp_cli_test';
+			$this->variables['DB_USER'] = 'fin_cli_test';
 		}
 
-		if ( false !== getenv( 'FP_CLI_TEST_DBPASS' ) ) {
-			$this->variables['DB_PASSWORD'] = getenv( 'FP_CLI_TEST_DBPASS' );
+		if ( false !== getenv( 'FIN_CLI_TEST_DBPASS' ) ) {
+			$this->variables['DB_PASSWORD'] = getenv( 'FIN_CLI_TEST_DBPASS' );
 		} else {
 			$this->variables['DB_PASSWORD'] = 'password1';
 		}
 
-		if ( getenv( 'FP_CLI_TEST_DBHOST' ) ) {
-			$this->variables['DB_HOST'] = getenv( 'FP_CLI_TEST_DBHOST' );
+		if ( getenv( 'FIN_CLI_TEST_DBHOST' ) ) {
+			$this->variables['DB_HOST'] = getenv( 'FIN_CLI_TEST_DBHOST' );
 		} else {
 			$this->variables['DB_HOST'] = 'localhost';
 		}
 
-		if ( getenv( 'FP_CLI_TEST_DBTYPE' ) ) {
-			$this->variables['DB_TYPE'] = getenv( 'FP_CLI_TEST_DBTYPE' );
+		if ( getenv( 'FIN_CLI_TEST_DBTYPE' ) ) {
+			$this->variables['DB_TYPE'] = getenv( 'FIN_CLI_TEST_DBTYPE' );
 		} else {
 			$this->variables['DB_TYPE'] = 'mysql';
 		}
@@ -854,8 +854,8 @@ class FeatureContext implements SnippetAcceptingContext {
 			$this->variables['MYSQL_HOST'] = getenv( 'MYSQL_HOST' );
 		}
 
-		if ( getenv( 'FP_CLI_TEST_DBSOCKET' ) ) {
-			$this->variables['DB_SOCKET'] = getenv( 'FP_CLI_TEST_DBSOCKET' );
+		if ( getenv( 'FIN_CLI_TEST_DBSOCKET' ) ) {
+			$this->variables['DB_SOCKET'] = getenv( 'FIN_CLI_TEST_DBSOCKET' );
 		}
 
 		self::$db_settings['dbname'] = $this->variables['DB_NAME'];
@@ -873,57 +873,57 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Replace standard {VARIABLE_NAME} variables and the special {INVOKE_FP_CLI_WITH_PHP_ARGS-args} and {FP_VERSION-version-latest} variables.
+	 * Replace standard {VARIABLE_NAME} variables and the special {INVOKE_FIN_CLI_WITH_PHP_ARGS-args} and {FIN_VERSION-version-latest} variables.
 	 * Note that standard variable names can only contain uppercase letters, digits and underscores and cannot begin with a digit.
 	 *
 	 * @param string $str
 	 * @return string
 	 */
 	public function replace_variables( $str ) {
-		if ( false !== strpos( $str, '{INVOKE_FP_CLI_WITH_PHP_ARGS-' ) ) {
-			$str = $this->replace_invoke_fp_cli_with_php_args( $str );
+		if ( false !== strpos( $str, '{INVOKE_FIN_CLI_WITH_PHP_ARGS-' ) ) {
+			$str = $this->replace_invoke_fin_cli_with_php_args( $str );
 		}
 		$str = preg_replace_callback( '/\{([A-Z_][A-Z_0-9]*)\}/', [ $this, 'replace_var' ], $str );
-		if ( false !== strpos( $str, '{FP_VERSION-' ) ) {
-			$str = $this->replace_fp_versions( $str );
+		if ( false !== strpos( $str, '{FIN_VERSION-' ) ) {
+			$str = $this->replace_fin_versions( $str );
 		}
 		return $str;
 	}
 
 	/**
-	 * Substitute {INVOKE_FP_CLI_WITH_PHP_ARGS-args} variables.
+	 * Substitute {INVOKE_FIN_CLI_WITH_PHP_ARGS-args} variables.
 	 *
 	 * @param string $str
 	 * @return string
 	 */
-	private function replace_invoke_fp_cli_with_php_args( $str ) {
+	private function replace_invoke_fin_cli_with_php_args( $str ) {
 		static $phar_path = null, $shell_path = null;
 
 		if ( null === $phar_path ) {
 			$phar_path      = false;
 			$phar_begin     = '#!/usr/bin/env php';
 			$phar_begin_len = strlen( $phar_begin );
-			$bin_dir        = getenv( 'FP_CLI_BIN_DIR' );
-			if ( false !== $bin_dir && file_exists( $bin_dir . '/fp' ) && file_get_contents( $bin_dir . '/fp', false, null, 0, $phar_begin_len ) === $phar_begin ) {
-				$phar_path = $bin_dir . '/fp';
+			$bin_dir        = getenv( 'FIN_CLI_BIN_DIR' );
+			if ( false !== $bin_dir && file_exists( $bin_dir . '/fin' ) && file_get_contents( $bin_dir . '/fin', false, null, 0, $phar_begin_len ) === $phar_begin ) {
+				$phar_path = $bin_dir . '/fin';
 			} else {
 				$src_dir         = dirname( __DIR__, 2 );
-				$bin_path        = $src_dir . '/bin/fp';
-				$vendor_bin_path = $src_dir . '/vendor/bin/fp';
+				$bin_path        = $src_dir . '/bin/fin';
+				$vendor_bin_path = $src_dir . '/vendor/bin/fin';
 				if ( file_exists( $bin_path ) && is_executable( $bin_path ) ) {
 					$shell_path = $bin_path;
 				} elseif ( file_exists( $vendor_bin_path ) && is_executable( $vendor_bin_path ) ) {
 					$shell_path = $vendor_bin_path;
 				} else {
-					$shell_path = 'fp';
+					$shell_path = 'fin';
 				}
 			}
 		}
 
 		$str = preg_replace_callback(
-			'/{INVOKE_FP_CLI_WITH_PHP_ARGS-([^}]*)}/',
+			'/{INVOKE_FIN_CLI_WITH_PHP_ARGS-([^}]*)}/',
 			static function ( $matches ) use ( $phar_path, $shell_path ) {
-				return $phar_path ? "php {$matches[1]} {$phar_path}" : ( 'FP_CLI_PHP_ARGS=' . escapeshellarg( $matches[1] ) . ' ' . $shell_path );
+				return $phar_path ? "php {$matches[1]} {$phar_path}" : ( 'FIN_CLI_PHP_ARGS=' . escapeshellarg( $matches[1] ) . ' ' . $shell_path );
 			},
 			$str
 		);
@@ -952,39 +952,39 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * Substitute {FP_VERSION-version-latest} variables.
+	 * Substitute {FIN_VERSION-version-latest} variables.
 	 *
 	 * @param string $str
 	 * @return string
 	 */
-	private function replace_fp_versions( $str ): string {
-		static $fp_versions = null;
-		if ( null === $fp_versions ) {
-			$fp_versions = [];
+	private function replace_fin_versions( $str ): string {
+		static $fin_versions = null;
+		if ( null === $fin_versions ) {
+			$fin_versions = [];
 
-			$fp_org_api = new WpOrgApi();
-			$result     = $fp_org_api->get_core_version_check();
+			$fin_org_api = new WpOrgApi();
+			$result     = $fin_org_api->get_core_version_check();
 
 			if ( is_array( $result ) && ! empty( $result['offers'] ) ) {
 				// Latest version alias.
-				$fp_versions['{FP_VERSION-latest}'] = count( $result['offers'] ) ? $result['offers'][0]['version'] : '';
+				$fin_versions['{FIN_VERSION-latest}'] = count( $result['offers'] ) ? $result['offers'][0]['version'] : '';
 				foreach ( $result['offers'] as $offer ) {
 					$sub_ver     = preg_replace( '/(^[0-9]+\.[0-9]+)\.[0-9]+$/', '$1', $offer['version'] );
-					$sub_ver_key = "{FP_VERSION-{$sub_ver}-latest}";
+					$sub_ver_key = "{FIN_VERSION-{$sub_ver}-latest}";
 
 					$main_ver     = preg_replace( '/(^[0-9]+)\.[0-9]+$/', '$1', $sub_ver );
-					$main_ver_key = "{FP_VERSION-{$main_ver}-latest}";
+					$main_ver_key = "{FIN_VERSION-{$main_ver}-latest}";
 
-					if ( ! isset( $fp_versions[ $main_ver_key ] ) ) {
-						$fp_versions[ $main_ver_key ] = $offer['version'];
+					if ( ! isset( $fin_versions[ $main_ver_key ] ) ) {
+						$fin_versions[ $main_ver_key ] = $offer['version'];
 					}
-					if ( ! isset( $fp_versions[ $sub_ver_key ] ) ) {
-						$fp_versions[ $sub_ver_key ] = $offer['version'];
+					if ( ! isset( $fin_versions[ $sub_ver_key ] ) ) {
+						$fin_versions[ $sub_ver_key ] = $offer['version'];
 					}
 				}
 			}
 		}
-		return strtr( $str, $fp_versions );
+		return strtr( $str, $fin_versions );
 	}
 
 	/**
@@ -1020,7 +1020,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	 */
 	public function create_run_dir(): void {
 		if ( ! isset( $this->variables['RUN_DIR'] ) ) {
-			self::$run_dir              = sys_get_temp_dir() . '/' . uniqid( 'fp-cli-test-run-' . self::$temp_dir_infix . '-', true );
+			self::$run_dir              = sys_get_temp_dir() . '/' . uniqid( 'fin-cli-test-run-' . self::$temp_dir_infix . '-', true );
 			$this->variables['RUN_DIR'] = self::$run_dir;
 			mkdir( $this->variables['RUN_DIR'] );
 		}
@@ -1030,15 +1030,15 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * @param string $version
 	 */
 	public function build_phar( $version = 'same' ): void {
-		$this->variables['PHAR_PATH'] = $this->variables['RUN_DIR'] . '/' . uniqid( 'fp-cli-build-', true ) . '.phar';
+		$this->variables['PHAR_PATH'] = $this->variables['RUN_DIR'] . '/' . uniqid( 'fin-cli-build-', true ) . '.phar';
 
 		$is_bundle = false;
 
-		// Test running against a package installed as a FP-CLI dependency
-		// FP-CLI bundle installed as a project dependency
-		$make_phar_path = self::get_vendor_dir() . '/fp-cli/fp-cli-bundle/utils/make-phar.php';
+		// Test running against a package installed as a FIN-CLI dependency
+		// FIN-CLI bundle installed as a project dependency
+		$make_phar_path = self::get_vendor_dir() . '/fin-cli/fin-cli-bundle/utils/make-phar.php';
 		if ( ! file_exists( $make_phar_path ) ) {
-			// Running against FP-CLI bundle proper
+			// Running against FIN-CLI bundle proper
 			$is_bundle = true;
 
 			$make_phar_path = self::get_vendor_dir() . '/../utils/make-phar.php';
@@ -1074,16 +1074,16 @@ class FeatureContext implements SnippetAcceptingContext {
 	 */
 	public function download_phar( $version = 'same' ): void {
 		if ( 'same' === $version ) {
-			$version = FP_CLI_VERSION;
+			$version = FIN_CLI_VERSION;
 		}
 
 		$download_url = sprintf(
-			'https://github.com/fp-cli/fp-cli/releases/download/v%1$s/fp-cli-%1$s.phar',
+			'https://github.com/fin-cli/fin-cli/releases/download/v%1$s/fin-cli-%1$s.phar',
 			$version
 		);
 
 		$this->variables['PHAR_PATH'] = $this->variables['RUN_DIR'] . '/'
-			. uniqid( 'fp-cli-download-', true )
+			. uniqid( 'fin-cli-download-', true )
 			. '.phar';
 
 		Process::create(
@@ -1099,7 +1099,7 @@ class FeatureContext implements SnippetAcceptingContext {
 	 * CACHE_DIR is a cache for downloaded test data such as images. Lives until manually deleted.
 	 */
 	private function set_cache_dir(): void {
-		$path = sys_get_temp_dir() . '/fp-cli-test-cache';
+		$path = sys_get_temp_dir() . '/fin-cli-test-cache';
 		if ( ! file_exists( $path ) ) {
 			mkdir( $path );
 		}
@@ -1164,7 +1164,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		);
 
 		if ( 0 !== $sql_result['exit_code'] ) {
-			# FP_CLI output functions are suppressed in behat context.
+			# FIN_CLI output functions are suppressed in behat context.
 			echo 'There was an error connecting to the database:' . \PHP_EOL;
 			if ( ! empty( $sql_result['stderr'] ) ) {
 				echo '  ' . trim( $sql_result['stderr'] ) . \PHP_EOL;
@@ -1200,7 +1200,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		$env = self::get_process_env_variables();
 
 		if ( isset( $this->variables['SUITE_CACHE_DIR'] ) ) {
-			$env['FP_CLI_CACHE_DIR'] = $this->variables['SUITE_CACHE_DIR'];
+			$env['FIN_CLI_CACHE_DIR'] = $this->variables['SUITE_CACHE_DIR'];
 		}
 
 		if ( isset( $this->variables['PROJECT_DIR'] ) ) {
@@ -1217,7 +1217,7 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		$env['BEHAT_STEP_LINE'] = $this->step_line;
 
-		$env['FP_CLI_TEST_DBTYPE'] = self::$db_type;
+		$env['FIN_CLI_TEST_DBTYPE'] = self::$db_type;
 
 		if ( isset( $this->variables['RUN_DIR'] ) ) {
 			$cwd = "{$this->variables['RUN_DIR']}/{$path}";
@@ -1285,19 +1285,19 @@ class FeatureContext implements SnippetAcceptingContext {
 	}
 
 	/**
-	 * @param string $fp_config_code
+	 * @param string $fin_config_code
 	 * @param string $line
 	 */
-	public function add_line_to_fp_config( &$fp_config_code, $line ): void {
+	public function add_line_to_fin_config( &$fin_config_code, $line ): void {
 		$token = "/* That's all, stop editing!";
 
-		$fp_config_code = str_replace( $token, "$line\n\n$token", $fp_config_code );
+		$fin_config_code = str_replace( $token, "$line\n\n$token", $fin_config_code );
 	}
 
 	/**
 	 * @param string $subdir
 	 */
-	public function download_fp( $subdir = '' ): void {
+	public function download_fin( $subdir = '' ): void {
 		$dest_dir = $this->variables['RUN_DIR'] . "/$subdir";
 
 		if ( $subdir ) {
@@ -1306,24 +1306,24 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		self::copy_dir( self::$cache_dir, $dest_dir );
 
-		if ( ! is_dir( $dest_dir . '/fp-content/mu-plugins' ) ) {
-			mkdir( $dest_dir . '/fp-content/mu-plugins' );
+		if ( ! is_dir( $dest_dir . '/fin-content/mu-plugins' ) ) {
+			mkdir( $dest_dir . '/fin-content/mu-plugins' );
 		}
 
 		// Disable emailing.
-		copy( dirname( __DIR__, 2 ) . '/utils/no-mail.php', $dest_dir . '/fp-content/mu-plugins/no-mail.php' );
+		copy( dirname( __DIR__, 2 ) . '/utils/no-mail.php', $dest_dir . '/fin-content/mu-plugins/no-mail.php' );
 
 		// Add polyfills.
-		copy( dirname( __DIR__, 2 ) . '/utils/polyfills.php', $dest_dir . '/fp-content/mu-plugins/polyfills.php' );
+		copy( dirname( __DIR__, 2 ) . '/utils/polyfills.php', $dest_dir . '/fin-content/mu-plugins/polyfills.php' );
 
 		if ( 'sqlite' === self::$db_type ) {
-			self::copy_dir( self::$sqlite_cache_dir, $dest_dir . '/fp-content/mu-plugins' );
+			self::copy_dir( self::$sqlite_cache_dir, $dest_dir . '/fin-content/mu-plugins' );
 			self::configure_sqlite( $dest_dir );
 		}
 	}
 
 	/**
-	 * Create a fp-config.php file.
+	 * Create a fin-config.php file.
 	 *
 	 * @param string $subdir
 	 * @param string|false $extra_php
@@ -1332,7 +1332,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		$params = self::$db_settings;
 
 		// Replaces all characters that are not alphanumeric or an underscore into an underscore.
-		$params['dbprefix'] = $subdir ? preg_replace( '#[^a-zA-Z\_0-9]#', '_', $subdir ) : 'fp_';
+		$params['dbprefix'] = $subdir ? preg_replace( '#[^a-zA-Z\_0-9]#', '_', $subdir ) : 'fin_';
 
 		$params['skip-salts'] = true;
 
@@ -1352,11 +1352,11 @@ class FeatureContext implements SnippetAcceptingContext {
 		}
 
 		if ( $config_cache_path && file_exists( $config_cache_path ) ) {
-			copy( $config_cache_path, $run_dir . '/fp-config.php' );
+			copy( $config_cache_path, $run_dir . '/fin-config.php' );
 		} else {
-			$this->proc( 'fp config create', $params, $subdir )->run_check();
-			if ( $config_cache_path && file_exists( $run_dir . '/fp-config.php' ) ) {
-				copy( $run_dir . '/fp-config.php', $config_cache_path );
+			$this->proc( 'fin config create', $params, $subdir )->run_check();
+			if ( $config_cache_path && file_exists( $run_dir . '/fin-config.php' ) ) {
+				copy( $run_dir . '/fin-config.php', $config_cache_path );
 			}
 		}
 	}
@@ -1364,29 +1364,29 @@ class FeatureContext implements SnippetAcceptingContext {
 	/**
 	 * @param string $subdir
 	 */
-	public function install_fp( $subdir = '' ): void {
-		$fp_version              = getenv( 'FP_VERSION' );
-		$fp_version_suffix       = ( false !== $fp_version ) ? "-$fp_version" : '';
-		self::$install_cache_dir = sys_get_temp_dir() . '/fp-cli-test-core-install-cache' . $fp_version_suffix;
+	public function install_fin( $subdir = '' ): void {
+		$fin_version              = getenv( 'FIN_VERSION' );
+		$fin_version_suffix       = ( false !== $fin_version ) ? "-$fin_version" : '';
+		self::$install_cache_dir = sys_get_temp_dir() . '/fin-cli-test-core-install-cache' . $fin_version_suffix;
 		if ( ! file_exists( self::$install_cache_dir ) ) {
 			mkdir( self::$install_cache_dir );
 		}
 
 		$subdir = $this->replace_variables( $subdir );
 
-		// Disable FP Cron by default to avoid bogus HTTP requests in CLI context.
-		$config_extra_php = "if ( ! defined( 'DISABLE_FP_CRON' ) ) { define( 'DISABLE_FP_CRON', true ); }\n";
+		// Disable FIN Cron by default to avoid bogus HTTP requests in CLI context.
+		$config_extra_php = "if ( ! defined( 'DISABLE_FIN_CRON' ) ) { define( 'DISABLE_FIN_CRON', true ); }\n";
 
 		if ( 'sqlite' !== self::$db_type ) {
 			$this->create_db();
 		}
 		$this->create_run_dir();
-		$this->download_fp( $subdir );
+		$this->download_fin( $subdir );
 		$this->create_config( $subdir, $config_extra_php );
 
 		$install_args = [
 			'url'            => 'https://example.com',
-			'title'          => 'FP CLI Site',
+			'title'          => 'FIN CLI Site',
 			'admin_user'     => 'admin',
 			'admin_email'    => 'admin@example.com',
 			'admin_password' => 'password1',
@@ -1402,12 +1402,12 @@ class FeatureContext implements SnippetAcceptingContext {
 
 			// This is the sqlite equivalent of restoring a database dump in MySQL
 			if ( 'sqlite' === self::$db_type ) {
-				copy( "{$install_cache_path}.sqlite", "$run_dir/fp-content/database/.ht.sqlite" );
+				copy( "{$install_cache_path}.sqlite", "$run_dir/fin-content/database/.ht.sqlite" );
 			} else {
 				self::run_sql( self::$mysql_binary . ' --no-defaults', [ 'execute' => "source {$install_cache_path}.sql" ], true /*add_database*/ );
 			}
 		} else {
-			$this->proc( 'fp core install', $install_args, $subdir )->run_check();
+			$this->proc( 'fin core install', $install_args, $subdir )->run_check();
 
 			mkdir( $install_cache_path );
 
@@ -1426,7 +1426,7 @@ class FeatureContext implements SnippetAcceptingContext {
 
 			if ( 'sqlite' === self::$db_type ) {
 				// This is the sqlite equivalent of creating a database dump in MySQL
-				copy( "$run_dir/fp-content/database/.ht.sqlite", "{$install_cache_path}.sqlite" );
+				copy( "$run_dir/fin-content/database/.ht.sqlite", "{$install_cache_path}.sqlite" );
 			}
 		}
 	}
@@ -1434,14 +1434,14 @@ class FeatureContext implements SnippetAcceptingContext {
 	/**
 	 * @param string $vendor_directory
 	 */
-	public function install_fp_with_composer( $vendor_directory = 'vendor' ): void {
+	public function install_fin_with_composer( $vendor_directory = 'vendor' ): void {
 		$this->create_run_dir();
 		$this->create_db();
 
-		$yml_path = $this->variables['RUN_DIR'] . '/fp-cli.yml';
+		$yml_path = $this->variables['RUN_DIR'] . '/fin-cli.yml';
 		file_put_contents( $yml_path, 'path: FinPress' );
 
-		$this->composer_command( 'init --name="fp-cli/composer-test" --type="project"' );
+		$this->composer_command( 'init --name="fin-cli/composer-test" --type="project"' );
 		$this->composer_command( 'config vendor-dir ' . $vendor_directory );
 		$this->composer_command( 'config extra.finpress-install-dir FinPress' );
 
@@ -1449,8 +1449,8 @@ class FeatureContext implements SnippetAcceptingContext {
 		$this->composer_command( 'config --no-plugins allow-plugins true' );
 		$this->composer_command( 'require johnpbloch/finpress-core-installer johnpbloch/finpress-core --optimize-autoloader' );
 
-		// Disable FP Cron by default to avoid bogus HTTP requests in CLI context.
-		$config_extra_php = "if ( ! defined( 'DISABLE_FP_CRON' ) ) { define( 'DISABLE_FP_CRON', true ); }\n";
+		// Disable FIN Cron by default to avoid bogus HTTP requests in CLI context.
+		$config_extra_php = "if ( ! defined( 'DISABLE_FIN_CRON' ) ) { define( 'DISABLE_FIN_CRON', true ); }\n";
 
 		$config_extra_php .= "require_once dirname(__DIR__) . '/" . $vendor_directory . "/autoload.php';\n";
 
@@ -1458,29 +1458,29 @@ class FeatureContext implements SnippetAcceptingContext {
 
 		$install_args = [
 			'url'            => 'http://localhost:8080',
-			'title'          => 'FP CLI Site with both FinPress and fp-cli as Composer dependencies',
+			'title'          => 'FIN CLI Site with both FinPress and fin-cli as Composer dependencies',
 			'admin_user'     => 'admin',
 			'admin_email'    => 'admin@example.com',
 			'admin_password' => 'password1',
 			'skip-email'     => true,
 		];
 
-		if ( ! is_dir( $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins' ) ) {
-			mkdir( $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins' );
+		if ( ! is_dir( $this->variables['RUN_DIR'] . '/FinPress/fin-content/mu-plugins' ) ) {
+			mkdir( $this->variables['RUN_DIR'] . '/FinPress/fin-content/mu-plugins' );
 		}
 
 		if ( 'sqlite' === self::$db_type ) {
-			mkdir( $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins/sqlite-database-integration' );
-			self::copy_dir( self::$sqlite_cache_dir, $this->variables['RUN_DIR'] . '/FinPress/fp-content/mu-plugins' );
+			mkdir( $this->variables['RUN_DIR'] . '/FinPress/fin-content/mu-plugins/sqlite-database-integration' );
+			self::copy_dir( self::$sqlite_cache_dir, $this->variables['RUN_DIR'] . '/FinPress/fin-content/mu-plugins' );
 			self::configure_sqlite( $this->variables['RUN_DIR'] . '/FinPress' );
 		}
 
-		$this->proc( 'fp core install', $install_args )->run_check();
+		$this->proc( 'fin core install', $install_args )->run_check();
 	}
 
-	public function composer_add_fp_cli_local_repository(): void {
+	public function composer_add_fin_cli_local_repository(): void {
 		if ( ! self::$composer_local_repository ) {
-			self::$composer_local_repository = sys_get_temp_dir() . '/' . uniqid( 'fp-cli-composer-local-', true );
+			self::$composer_local_repository = sys_get_temp_dir() . '/' . uniqid( 'fin-cli-composer-local-', true );
 			mkdir( self::$composer_local_repository );
 
 			$env = self::get_process_env_variables();
@@ -1491,14 +1491,14 @@ class FeatureContext implements SnippetAcceptingContext {
 			self::remove_dir( self::$composer_local_repository . '/vendor' );
 		}
 		$dest = self::$composer_local_repository . '/';
-		$this->composer_command( "config repositories.fp-cli '{\"type\": \"path\", \"url\": \"$dest\", \"options\": {\"symlink\": false, \"versions\": { \"fp-cli/fp-cli\": \"dev-main\"}}}'" );
+		$this->composer_command( "config repositories.fin-cli '{\"type\": \"path\", \"url\": \"$dest\", \"options\": {\"symlink\": false, \"versions\": { \"fin-cli/fin-cli\": \"dev-main\"}}}'" );
 		$this->variables['COMPOSER_LOCAL_REPOSITORY'] = self::$composer_local_repository;
 	}
 
-	public function composer_require_current_fp_cli(): void {
-		$this->composer_add_fp_cli_local_repository();
+	public function composer_require_current_fin_cli(): void {
+		$this->composer_add_fin_cli_local_repository();
 		// TODO: Specific alias version should be deduced to keep up-to-date.
-		$this->composer_command( 'require "fp-cli/fp-cli:dev-main as 2.5.x-dev" --optimize-autoloader' );
+		$this->composer_command( 'require "fin-cli/fin-cli:dev-main as 2.5.x-dev" --optimize-autoloader' );
 	}
 
 	/**
@@ -1515,7 +1515,7 @@ class FeatureContext implements SnippetAcceptingContext {
 			'localhost:8080',
 			$dir,
 			get_cfg_var( 'cfg_file_path' ),
-			$this->variables['RUN_DIR'] . '/vendor/fp-cli/server-command/router.php'
+			$this->variables['RUN_DIR'] . '/vendor/fin-cli/server-command/router.php'
 		);
 		$this->background_proc( $cmd );
 	}
@@ -1547,7 +1547,7 @@ class FeatureContext implements SnippetAcceptingContext {
 		self::$num_top_processes = $travis ? 10 : 40;
 		self::$num_top_scenarios = $travis ? 10 : 20;
 
-		// Allow setting of above with "FP_CLI_TEST_LOG_RUN_TIMES=<output_to>[,<num_top_processes>][,<num_top_scenarios>]" formatted env var.
+		// Allow setting of above with "FIN_CLI_TEST_LOG_RUN_TIMES=<output_to>[,<num_top_processes>][,<num_top_scenarios>]" formatted env var.
 		if ( preg_match( '/^(stdout|error_log)?(,[0-9]+)?(,[0-9]+)?$/i', self::$log_run_times, $matches ) ) {
 			if ( isset( $matches[1] ) ) {
 				self::$output_to = strtolower( $matches[1] );
@@ -1761,8 +1761,8 @@ class FeatureContext implements SnippetAcceptingContext {
 /**
  * @param string $message
  */
-function fp_cli_behat_env_debug( $message ): void { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
-	if ( ! getenv( 'FP_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
+function fin_cli_behat_env_debug( $message ): void { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
+	if ( ! getenv( 'FIN_CLI_TEST_DEBUG_BEHAT_ENV' ) ) {
 		return;
 	}
 
@@ -1772,9 +1772,9 @@ function fp_cli_behat_env_debug( $message ): void { // phpcs:ignore Universal.Fi
 /**
  * Load required support files as needed before heading into the Behat context.
  */
-function fpcli_bootstrap_behat_feature_context(): void {
+function fincli_bootstrap_behat_feature_context(): void {
 	$vendor_folder = FeatureContext::get_vendor_dir();
-	fp_cli_behat_env_debug( "Vendor folder location: {$vendor_folder}" );
+	fin_cli_behat_env_debug( "Vendor folder location: {$vendor_folder}" );
 
 	// Didn't manage to detect a valid vendor folder.
 	if ( empty( $vendor_folder ) ) {
@@ -1785,12 +1785,12 @@ function fpcli_bootstrap_behat_feature_context(): void {
 	$project_folder = dirname( $vendor_folder );
 
 	$framework_folder = FeatureContext::get_framework_dir();
-	fp_cli_behat_env_debug( "Framework folder location: {$framework_folder}" );
+	fin_cli_behat_env_debug( "Framework folder location: {$framework_folder}" );
 
 	// Load helper functionality that is needed for the tests.
 	require_once "{$framework_folder}/php/utils.php";
-	require_once "{$framework_folder}/php/FP_CLI/Process.php";
-	require_once "{$framework_folder}/php/FP_CLI/ProcessRun.php";
+	require_once "{$framework_folder}/php/FIN_CLI/Process.php";
+	require_once "{$framework_folder}/php/FIN_CLI/ProcessRun.php";
 
 	// Manually load Composer file includes by generating a config with require:
 	// statements for each file.
@@ -1809,7 +1809,7 @@ function fpcli_bootstrap_behat_feature_context(): void {
 		$contents .= "  - {$project_folder}/{$file}\n";
 	}
 
-	$temp_folder = sys_get_temp_dir() . '/fp-cli-package-test';
+	$temp_folder = sys_get_temp_dir() . '/fin-cli-package-test';
 	if (
 		! is_dir( $temp_folder )
 		&& ! mkdir( $temp_folder )
@@ -1820,10 +1820,10 @@ function fpcli_bootstrap_behat_feature_context(): void {
 
 	$project_config = "{$temp_folder}/config.yml";
 	file_put_contents( $project_config, $contents );
-	putenv( 'FP_CLI_CONFIG_PATH=' . $project_config );
+	putenv( 'FIN_CLI_CONFIG_PATH=' . $project_config );
 
-	fp_cli_behat_env_debug( "Project config file location: {$project_config}" );
-	fp_cli_behat_env_debug( "Project config:\n{$contents}" );
+	fin_cli_behat_env_debug( "Project config file location: {$project_config}" );
+	fin_cli_behat_env_debug( "Project config:\n{$contents}" );
 }
 
-fpcli_bootstrap_behat_feature_context();
+fincli_bootstrap_behat_feature_context();

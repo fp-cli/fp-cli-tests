@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# To retrieve the FP-CLI tests package root folder, we start with this scripts
+# To retrieve the FIN-CLI tests package root folder, we start with this scripts
 # location.
 SOURCE="${BASH_SOURCE[0]}"
 
@@ -13,8 +13,8 @@ while [ -h "$SOURCE" ]; do
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
 
-# Fetch the root folder of the FP-CLI tests package.
-FP_CLI_TESTS_ROOT="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
-export FP_CLI_TESTS_ROOT
+# Fetch the root folder of the FIN-CLI tests package.
+FIN_CLI_TESTS_ROOT="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+export FIN_CLI_TESTS_ROOT
 
-"$FP_CLI_TESTS_ROOT"/bin/run-behat-tests --rerun "$@"
+"$FIN_CLI_TESTS_ROOT"/bin/run-behat-tests --rerun "$@"

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="FP-CLI-tests">
-	<description>Custom ruleset for FP-CLI-tests</description>
+<ruleset name="FIN-CLI-tests">
+	<description>Custom ruleset for FIN-CLI-tests</description>
 
 	<!--
 	#############################################################################
@@ -27,11 +27,11 @@
 
 	<!--
 	#############################################################################
-	USE THE FP_CLI_CS RULESET
+	USE THE FIN_CLI_CS RULESET
 	#############################################################################
 	-->
 
-	<rule ref="FP_CLI_CS"/>
+	<rule ref="FIN_CLI_CS"/>
 
 	<!--
 	#############################################################################
@@ -48,7 +48,7 @@
 	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array" extend="true">
-				<element value="FP_CLI\Tests"/><!-- Namespaces. -->
+				<element value="FIN_CLI\Tests"/><!-- Namespaces. -->
 			</property>
 		</properties>
 	</rule>
@@ -67,7 +67,7 @@
 		<exclude-pattern>tests/tests/PHPStan/*</exclude-pattern>
 	</rule>
 
-	<rule ref="FinPress.FP.AlternativeFunctions.parse_url_parse_url">
+	<rule ref="FinPress.FIN.AlternativeFunctions.parse_url_parse_url">
 		<exclude-pattern>tests/data/*</exclude-pattern>
 	</rule>
 
@@ -76,11 +76,11 @@
 	</rule>
 
 	<!-- This is a procedural stand-alone file that is never loaded in a FinPress context,
-		 so this file does not have to comply with FP naming conventions. -->
+		 so this file does not have to comply with FIN naming conventions. -->
 	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<exclude-pattern>*/utils/behat-tags\.php$</exclude-pattern>
 	</rule>
-	<rule ref="FinPress.FP.GlobalVariablesOverride">
+	<rule ref="FinPress.FIN.GlobalVariablesOverride">
 		<exclude-pattern>*/utils/behat-tags\.php$</exclude-pattern>
 	</rule>
 
@@ -91,11 +91,11 @@
 	</rule>
 
 	<!-- This is a procedural stand-alone file that is never loaded in a FinPress context,
-		 so this file does not have to comply with FP naming conventions. -->
+		 so this file does not have to comply with FIN naming conventions. -->
 	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<exclude-pattern>*/generate-coverage\.php$</exclude-pattern>
 	</rule>
-	<rule ref="FinPress.FP.GlobalVariablesOverride">
+	<rule ref="FinPress.FIN.GlobalVariablesOverride">
 		<exclude-pattern>*/generate-coverage\.php$</exclude-pattern>
 	</rule>
 </ruleset>

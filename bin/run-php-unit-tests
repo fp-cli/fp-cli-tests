@@ -10,8 +10,8 @@ then
 		EXTRA_ARGS="--display-warnings --fail-on-warning --display-notices --fail-on-notice --display-deprecations --fail-on-deprecation"
 	fi
 
-	if [ -f "./vendor/fp-cli/fp-cli-tests/tests/bootstrap.php" ]; then
-		vendor/bin/phpunit --color=always "$@" $EXTRA_ARGS --bootstrap ./vendor/fp-cli/fp-cli-tests/tests/bootstrap.php
+	if [ -f "./vendor/fin-cli/fin-cli-tests/tests/bootstrap.php" ]; then
+		vendor/bin/phpunit --color=always "$@" $EXTRA_ARGS --bootstrap ./vendor/fin-cli/fin-cli-tests/tests/bootstrap.php
 	else
 		vendor/bin/phpunit --color=always "$@" $EXTRA_ARGS
 	fi

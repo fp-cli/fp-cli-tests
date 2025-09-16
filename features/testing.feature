@@ -1,33 +1,33 @@
-Feature: Test that FP-CLI loads.
+Feature: Test that FIN-CLI loads.
 
-  Scenario: FP-CLI loads for your tests
-    Given a FP install
+  Scenario: FIN-CLI loads for your tests
+    Given a FIN install
 
-    When I run `fp eval 'echo "Hello world.";'`
+    When I run `fin eval 'echo "Hello world.";'`
     Then STDOUT should contain:
       """
       Hello world.
       """
 
-  Scenario: FP Cron is disabled by default
-    Given a FP install
+  Scenario: FIN Cron is disabled by default
+    Given a FIN install
     And a test_cron.php file:
       """
       <?php
-      $cron_disabled = defined( "DISABLE_FP_CRON" ) ? DISABLE_FP_CRON : false;
-      echo 'DISABLE_FP_CRON is: ' . ( $cron_disabled ? 'true' : 'false' );
+      $cron_disabled = defined( "DISABLE_FIN_CRON" ) ? DISABLE_FIN_CRON : false;
+      echo 'DISABLE_FIN_CRON is: ' . ( $cron_disabled ? 'true' : 'false' );
       """
 
-    When I run `fp eval-file test_cron.php`
+    When I run `fin eval-file test_cron.php`
     Then STDOUT should be:
       """
-      DISABLE_FP_CRON is: true
+      DISABLE_FIN_CRON is: true
       """
 
   @require-sqlite
   Scenario: Uses SQLite
-    Given a FP install
-    When I run `fp eval 'echo DB_ENGINE;'`
+    Given a FIN install
+    When I run `fin eval 'echo DB_ENGINE;'`
     Then STDOUT should contain:
       """
       sqlite
@@ -35,19 +35,19 @@ Feature: Test that FP-CLI loads.
 
   @require-mysql
   Scenario: Uses MySQL
-    Given a FP install
-    When I run `fp eval 'var_export( defined("DB_ENGINE") );'`
+    Given a FIN install
+    When I run `fin eval 'var_export( defined("DB_ENGINE") );'`
     Then STDOUT should be:
       """
       false
       """
 
   @require-sqlite
-  Scenario: Custom fp-content directory
-    Given a FP install
-    And a custom fp-content directory
+  Scenario: Custom fin-content directory
+    Given a FIN install
+    And a custom fin-content directory
 
-    When I run `fp eval 'echo DB_ENGINE;'`
+    When I run `fin eval 'echo DB_ENGINE;'`
     Then STDOUT should contain:
       """
       sqlite
@@ -55,9 +55,9 @@ Feature: Test that FP-CLI loads.
 
   @require-sqlite
   Scenario: Composer installation
-    Given a FP install with Composer
+    Given a FIN install with Composer
 
-    When I run `fp eval 'echo DB_ENGINE;'`
+    When I run `fin eval 'echo DB_ENGINE;'`
     Then STDOUT should contain:
       """
       sqlite

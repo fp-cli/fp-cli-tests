@@ -1,16 +1,16 @@
 <?php
 /**
- * Polyfills used by Behat to support multiple versions of FP.
+ * Polyfills used by Behat to support multiple versions of FIN.
  *
- * This file will get installed as a must-use plugin in FP installs that are run
+ * This file will get installed as a must-use plugin in FIN installs that are run
  * by the functional tests.
  */
 
 /*
  * Add a polyfill for the get_theme_file_uri(), as it is required for the
  * TwentyTwenty theme's starter content, and will fatal the site if you install
- * FP 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
- * to a version of FP lower than 4.7.
+ * FIN 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
+ * to a version of FIN lower than 4.7.
  *
  * Note: This is a quick fix, and a cleaner solution would be to change the
  * active theme on downgrading, if the current theme declares it is not
@@ -56,8 +56,8 @@ if ( ! function_exists( 'get_theme_file_uri' ) ) {
 /*
  * Add a polyfill for the is_customize_preview(), as it is required for the
  * TwentyTwenty theme's starter content, and will fatal the site if you install
- * FP 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
- * to a version of FP lower than 4.0.
+ * FIN 5.3 first (setting TwentyTwenty as the active theme) and then downgrade
+ * to a version of FIN lower than 4.0.
  *
  * Note: This is a quick fix, and a cleaner solution would be to change the
  * active theme on downgrading, if the current theme declares it is not
@@ -71,7 +71,7 @@ if ( ! function_exists( 'is_customize_preview' ) ) {
 	 *
 	 * @since 4.0.0
 	 *
-	 * @global FP_Customize_Manager $fp_customize Customizer instance.
+	 * @global FIN_Customize_Manager $fin_customize Customizer instance.
 	 *
 	 * @return bool True if the site is being previewed in the Customizer, false otherwise.
 	 */

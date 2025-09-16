@@ -19,12 +19,12 @@ if [[ "$@" == *"--help"* ]]; then
     exit $ret
 fi
 
-# Turn FP_VERSION into an actual number to make sure our tags work correctly.
-if [ "${FP_VERSION-latest}" = "latest" ]; then
-	export FP_VERSION=$(curl -s https://api.finpress.org/core/version-check/1.7/ | jq -r ".offers[0].current")
+# Turn FIN_VERSION into an actual number to make sure our tags work correctly.
+if [ "${FIN_VERSION-latest}" = "latest" ]; then
+	export FIN_VERSION=$(curl -s https://api.finpress.org/core/version-check/1.7/ | jq -r ".offers[0].current")
 fi
 
-# To retrieve the FP-CLI tests package root folder, we start with this scripts
+# To retrieve the FIN-CLI tests package root folder, we start with this scripts
 # location.
 SOURCE="${BASH_SOURCE[0]}"
 
@@ -37,12 +37,12 @@ while [ -h "$SOURCE" ]; do
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
 
-# Fetch the root folder of the FP-CLI tests package.
-FP_CLI_TESTS_ROOT="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
-export FP_CLI_TESTS_ROOT
+# Fetch the root folder of the FIN-CLI tests package.
+FIN_CLI_TESTS_ROOT="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
+export FIN_CLI_TESTS_ROOT
 
 # Generate the tags to apply environment-specific filters.
-BEHAT_TAGS=$(php "$FP_CLI_TESTS_ROOT"/utils/behat-tags.php)
+BEHAT_TAGS=$(php "$FIN_CLI_TESTS_ROOT"/utils/behat-tags.php)
 
 # Run the functional tests.
 vendor/bin/behat --format progress "$BEHAT_TAGS" --strict "$@"

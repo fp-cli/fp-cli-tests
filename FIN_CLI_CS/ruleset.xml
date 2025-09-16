@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="FP_CLI_CS" xsi:noNamespaceSchemaLocation="../vendor/squizlabs/php_codesniffer/phpcs.xsd">
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="FIN_CLI_CS" xsi:noNamespaceSchemaLocation="../vendor/squizlabs/php_codesniffer/phpcs.xsd">
 
-	<description>Coding standard for FP-CLI projects</description>
+	<description>Coding standard for FIN-CLI projects</description>
 
 	<!--
-	To include this ruleset in a FP-CLI project, use `rule ref="FP_CLI_CS"` in brackets.
+	To include this ruleset in a FIN-CLI project, use `rule ref="FIN_CLI_CS"` in brackets.
 	See the instructions in the README/USING for an example.
 
 	For help using PHPCS: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage
@@ -37,7 +37,7 @@
 		<!-- Only scan PHP files for PHP compatibility. -->
 		<include-pattern>*\.php$</include-pattern>
 
-		<!-- Polyfill package is included with FP-CLI, so available to all projects. -->
+		<!-- Polyfill package is included with FIN-CLI, so available to all projects. -->
 		<exclude name="PHPCompatibility.FunctionUse.NewFunctions.array_columnFound"/>
 	</rule>
 
@@ -61,26 +61,26 @@
 		<!-- To make autoloading easier, PSR-4 is mostly adhered to for file naming. -->
 		<exclude name="FinPress.Files.FileName"/>
 
-		<!-- Output is sent to cli, not to HTML, so this sniff is not applicable to FP-CLI.
+		<!-- Output is sent to cli, not to HTML, so this sniff is not applicable to FIN-CLI.
 			 Note: some output escaping may still be needed/beneficial, however this would probably
 			 require a custom sniff. -->
 		<exclude name="FinPress.Security.EscapeOutput"/>
 
-		<!-- FP-CLI is intended as a developer tool, so using development functions should be fine. -->
+		<!-- FIN-CLI is intended as a developer tool, so using development functions should be fine. -->
 		<exclude name="FinPress.PHP.DevelopmentFunctions"/>
 
 		<!-- Make some allowance for the fact that the code will be run in a command-line environment. -->
 		<exclude name="Generic.PHP.BacktickOperator"/>
 
-		<!-- We want to stick with short array syntax for FP-CLI. -->
+		<!-- We want to stick with short array syntax for FIN-CLI. -->
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found"/>
 
-		<!-- Keep short ternaries around for FP-CLI. -->
+		<!-- Keep short ternaries around for FIN-CLI. -->
 		<exclude name="Universal.Operators.DisallowShortTernary.Found"/>
 
 		<!-- Allow filesystem operations because FinPress APIs may not be available -->
-		<exclude name="FinPress.FP.AlternativeFunctions.rename_rename" />
-		<exclude name="FinPress.FP.AlternativeFunctions.unlink_unlink" />
+		<exclude name="FinPress.FIN.AlternativeFunctions.rename_rename" />
+		<exclude name="FinPress.FIN.AlternativeFunctions.unlink_unlink" />
 	</rule>
 
 
@@ -96,9 +96,9 @@
 		<properties>
 			<property name="prefixes" type="array">
 				<!-- Namespaces and non-namespaced classes. -->
-				<element value="FP_CLI"/>
+				<element value="FIN_CLI"/>
 				<!-- Global variables and functions. -->
-				<element value="fpcli"/>
+				<element value="fincli"/>
 			</property>
 		</properties>
 	</rule>
@@ -122,7 +122,7 @@
 		</properties>
 	</rule>
 
-	<rule ref="FinPress.FP.AlternativeFunctions">
+	<rule ref="FinPress.FIN.AlternativeFunctions">
 		<properties>
 			<property name="exclude" type="array">
 				<element value="curl"/>

@@ -1,36 +1,36 @@
 <?php
 
 /**
- * Test data for FPCliRuncommandDynamicReturnTypeExtension.
+ * Test data for FINCliRuncommandDynamicReturnTypeExtension.
  */
 
 declare(strict_types=1);
 
-namespace FP_CLI\Tests\Tests\PHPStan;
+namespace FIN_CLI\Tests\Tests\PHPStan;
 
-use FP_CLI;
+use FIN_CLI;
 use function PHPStan\Testing\assertType;
 
 
-$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => true ] );
+$value = FIN_CLI::runcommand( 'plugin list --format=json', [ 'return' => true ] );
 assertType( 'string', $value );
 
-$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => false ] );
+$value = FIN_CLI::runcommand( 'plugin list --format=json', [ 'return' => false ] );
 assertType( 'null', $value );
 
-$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'all' ] );
+$value = FIN_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'all' ] );
 assertType( 'object{stdout: string, stderr: string, return_code: int}', $value );
 
-$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stdout' ] );
+$value = FIN_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stdout' ] );
 assertType( 'string', $value );
 
-$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stderr' ] );
+$value = FIN_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'stderr' ] );
 assertType( 'string', $value );
 
-$value = FP_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'return_code' ] );
+$value = FIN_CLI::runcommand( 'plugin list --format=json', [ 'return' => 'return_code' ] );
 assertType( 'int', $value );
 
-$value = FP_CLI::runcommand(
+$value = FIN_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return' => true,
@@ -39,7 +39,7 @@ $value = FP_CLI::runcommand(
 );
 assertType( 'array|null', $value );
 
-$value = FP_CLI::runcommand(
+$value = FIN_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return' => 'stdout',
@@ -48,7 +48,7 @@ $value = FP_CLI::runcommand(
 );
 assertType( 'array|null', $value );
 
-$value = FP_CLI::runcommand(
+$value = FIN_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return'     => 'stdout',
@@ -57,7 +57,7 @@ $value = FP_CLI::runcommand(
 );
 assertType( 'string', $value );
 
-$value = FP_CLI::runcommand(
+$value = FIN_CLI::runcommand(
 	'plugin list --format=json',
 	[
 		'return'     => 'stdout',

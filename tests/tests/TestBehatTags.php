@@ -1,9 +1,9 @@
 <?php
 
-namespace FP_CLI\Tests\Tests;
+namespace FIN_CLI\Tests\Tests;
 
-use FP_CLI\Tests\TestCase;
-use FP_CLI\Utils;
+use FIN_CLI\Tests\TestCase;
+use FIN_CLI\Utils;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
@@ -17,7 +17,7 @@ class TestBehatTags extends TestCase {
 	protected function set_up(): void {
 		parent::set_up();
 
-		$this->temp_dir = Utils\get_temp_dir() . uniqid( 'fp-cli-test-behat-tags-', true );
+		$this->temp_dir = Utils\get_temp_dir() . uniqid( 'fin-cli-test-behat-tags-', true );
 		mkdir( $this->temp_dir );
 		mkdir( $this->temp_dir . '/features' );
 	}
@@ -36,29 +36,29 @@ class TestBehatTags extends TestCase {
 	}
 
 	/**
-	 * @dataProvider data_behat_tags_fp_version_github_token
+	 * @dataProvider data_behat_tags_fin_version_github_token
 	 *
 	 * @param string $env
 	 * @param string $expected
 	 */
-	#[DataProvider( 'data_behat_tags_fp_version_github_token' )] // phpcs:ignore PHPCompatibility.Attributes.NewAttributes.PHPUnitAttributeFound
-	public function test_behat_tags_fp_version_github_token( $env, $expected ): void {
-		$env_fp_version   = getenv( 'FP_VERSION' );
+	#[DataProvider( 'data_behat_tags_fin_version_github_token' )] // phpcs:ignore PHPCompatibility.Attributes.NewAttributes.PHPUnitAttributeFound
+	public function test_behat_tags_fin_version_github_token( $env, $expected ): void {
+		$env_fin_version   = getenv( 'FIN_VERSION' );
 		$env_github_token = getenv( 'GITHUB_TOKEN' );
-		$db_type          = getenv( 'FP_CLI_TEST_DBTYPE' );
+		$db_type          = getenv( 'FIN_CLI_TEST_DBTYPE' );
 
-		putenv( 'FP_VERSION' );
+		putenv( 'FIN_VERSION' );
 		putenv( 'GITHUB_TOKEN' );
 
 		$behat_tags = dirname( dirname( __DIR__ ) ) . '/utils/behat-tags.php';
 
-		$contents = '@require-fp-4.6 @require-fp-4.8 @require-fp-4.9 @less-than-fp-4.6 @less-than-fp-4.8 @less-than-fp-4.9';
-		file_put_contents( $this->temp_dir . '/features/fp_version.feature', $contents );
+		$contents = '@require-fin-4.6 @require-fin-4.8 @require-fin-4.9 @less-than-fin-4.6 @less-than-fin-4.8 @less-than-fin-4.9';
+		file_put_contents( $this->temp_dir . '/features/fin_version.feature', $contents );
 
 		$output = exec( "cd {$this->temp_dir}; $env php $behat_tags" );
 
 		$expected .= '&&~@broken';
-		if ( in_array( $env, array( 'FP_VERSION=trunk', 'FP_VERSION=nightly' ), true ) ) {
+		if ( in_array( $env, array( 'FIN_VERSION=trunk', 'FIN_VERSION=nightly' ), true ) ) {
 			$expected .= '&&~@broken-trunk';
 		}
 
@@ -81,26 +81,26 @@ class TestBehatTags extends TestCase {
 
 		$this->assertSame( '--tags=' . $expected, $output );
 
-		putenv( false === $env_fp_version ? 'FP_VERSION' : "FP_VERSION=$env_fp_version" );
+		putenv( false === $env_fin_version ? 'FIN_VERSION' : "FIN_VERSION=$env_fin_version" );
 		putenv( false === $env_github_token ? 'GITHUB_TOKEN' : "GITHUB_TOKEN=$env_github_token" );
 	}
 
 	/**
 	 * @return array<array{string, string}>
 	 */
-	public static function data_behat_tags_fp_version_github_token(): array {
+	public static function data_behat_tags_fin_version_github_token(): array {
 		return array(
-			array( 'FP_VERSION=4.5', '~@require-fp-4.6&&~@require-fp-4.8&&~@require-fp-4.9&&~@github-api' ),
-			array( 'FP_VERSION=4.6', '~@require-fp-4.8&&~@require-fp-4.9&&~@less-than-fp-4.6&&~@github-api' ),
-			array( 'FP_VERSION=4.7', '~@require-fp-4.8&&~@require-fp-4.9&&~@less-than-fp-4.6&&~@github-api' ),
-			array( 'FP_VERSION=4.8', '~@require-fp-4.9&&~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@github-api' ),
-			array( 'FP_VERSION=4.9', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
-			array( 'FP_VERSION=5.0', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
-			array( 'FP_VERSION=latest', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
-			array( 'FP_VERSION=trunk', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
-			array( 'FP_VERSION=nightly', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
-			array( '', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9&&~@github-api' ),
-			array( 'GITHUB_TOKEN=blah', '~@less-than-fp-4.6&&~@less-than-fp-4.8&&~@less-than-fp-4.9' ),
+			array( 'FIN_VERSION=4.5', '~@require-fin-4.6&&~@require-fin-4.8&&~@require-fin-4.9&&~@github-api' ),
+			array( 'FIN_VERSION=4.6', '~@require-fin-4.8&&~@require-fin-4.9&&~@less-than-fin-4.6&&~@github-api' ),
+			array( 'FIN_VERSION=4.7', '~@require-fin-4.8&&~@require-fin-4.9&&~@less-than-fin-4.6&&~@github-api' ),
+			array( 'FIN_VERSION=4.8', '~@require-fin-4.9&&~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@github-api' ),
+			array( 'FIN_VERSION=4.9', '~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@less-than-fin-4.9&&~@github-api' ),
+			array( 'FIN_VERSION=5.0', '~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@less-than-fin-4.9&&~@github-api' ),
+			array( 'FIN_VERSION=latest', '~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@less-than-fin-4.9&&~@github-api' ),
+			array( 'FIN_VERSION=trunk', '~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@less-than-fin-4.9&&~@github-api' ),
+			array( 'FIN_VERSION=nightly', '~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@less-than-fin-4.9&&~@github-api' ),
+			array( '', '~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@less-than-fin-4.9&&~@github-api' ),
+			array( 'GITHUB_TOKEN=blah', '~@less-than-fin-4.6&&~@less-than-fin-4.8&&~@less-than-fin-4.9' ),
 		);
 	}
 
@@ -153,7 +153,7 @@ class TestBehatTags extends TestCase {
 
 	public function test_behat_tags_extension(): void {
 		$env_github_token = getenv( 'GITHUB_TOKEN' );
-		$db_type          = getenv( 'FP_CLI_TEST_DBTYPE' );
+		$db_type          = getenv( 'FIN_CLI_TEST_DBTYPE' );
 
 		putenv( 'GITHUB_TOKEN' );
 
@@ -195,7 +195,7 @@ class TestBehatTags extends TestCase {
 	}
 
 	public function test_behat_tags_db_version(): void {
-		$db_type = getenv( 'FP_CLI_TEST_DBTYPE' );
+		$db_type = getenv( 'FIN_CLI_TEST_DBTYPE' );
 
 		$behat_tags = dirname( dirname( __DIR__ ) ) . '/utils/behat-tags.php';
 		require $behat_tags;

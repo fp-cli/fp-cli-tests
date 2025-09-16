@@ -1,12 +1,12 @@
 <?php
 
-namespace FP_CLI\Tests\Context;
+namespace FIN_CLI\Tests\Context;
 
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use RuntimeException;
-use FP_CLI\Process;
-use FP_CLI\Utils;
+use FIN_CLI\Process;
+use FIN_CLI\Utils;
 
 trait GivenStepDefinitions {
 
@@ -73,7 +73,7 @@ trait GivenStepDefinitions {
 	}
 
 	/**
-	 * Clears the FP-CLI cache directory.
+	 * Clears the FIN-CLI cache directory.
 	 *
 	 * ```
 	 * Scenario: My example scenario
@@ -97,7 +97,7 @@ trait GivenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a fp-cli.yml file:
+	 *   Given a fin-cli.yml file:
 	 *     """
 	 *     @foo:
 	 *       path: foo
@@ -155,7 +155,7 @@ trait GivenStepDefinitions {
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given that HTTP requests to https://api.github.com/repos/fp-cli/fp-cli/releases?per_page=100 will respond with:
+	 *   Given that HTTP requests to https://api.github.com/repos/fin-cli/fin-cli/releases?per_page=100 will respond with:
 	 *     """
 	 *     HTTP/1.1 200
 	 *     Content-Type: application/json
@@ -176,7 +176,7 @@ trait GivenStepDefinitions {
 			$this->create_run_dir();
 		}
 
-		$config_file = $this->variables['RUN_DIR'] . '/fp-cli.yml';
+		$config_file = $this->variables['RUN_DIR'] . '/fin-cli.yml';
 		$mock_file   = $this->variables['RUN_DIR'] . '/mock-requests.php';
 		$dir         = dirname( $config_file );
 
@@ -204,7 +204,7 @@ FILE;
  * HTTP request mocking supporting both Requests v1 and v2.
  */
 
-trait FP_CLI_Tests_Mock_Requests_Trait {
+trait FIN_CLI_Tests_Mock_Requests_Trait {
 	public function request( \$url, \$headers = array(), \$data = array(), \$options = array() ) {
 		\$mocked_requests = $mocked_requests;
 
@@ -236,24 +236,24 @@ trait FP_CLI_Tests_Mock_Requests_Trait {
 }
 
 if ( interface_exists( '\WpOrg\Requests\Transport' ) ) {
-	class FP_CLI_Tests_Mock_Requests_Transport implements \WpOrg\Requests\Transport {
-		use FP_CLI_Tests_Mock_Requests_Trait;
+	class FIN_CLI_Tests_Mock_Requests_Transport implements \WpOrg\Requests\Transport {
+		use FIN_CLI_Tests_Mock_Requests_Trait;
 	}
 } else {
-	class FP_CLI_Tests_Mock_Requests_Transport implements \Requests_Transport {
-		use FP_CLI_Tests_Mock_Requests_Trait;
+	class FIN_CLI_Tests_Mock_Requests_Transport implements \Requests_Transport {
+		use FIN_CLI_Tests_Mock_Requests_Trait;
 	}
 }
 
-FP_CLI::add_hook(
+FIN_CLI::add_hook(
 	'http_request_options',
 	static function( \$options ) {
-		\$options['transport'] = new FP_CLI_Tests_Mock_Requests_Transport();
+		\$options['transport'] = new FIN_CLI_Tests_Mock_Requests_Transport();
 		return \$options;
 	}
 );
 
-FP_CLI::add_fp_hook(
+FIN_CLI::add_fin_hook(
 	'pre_http_request',
 	static function( \$pre, \$parsed_args, \$url ) {
 		\$mocked_requests = $mocked_requests;
@@ -332,32 +332,32 @@ FILE;
 	 * ```
 	 * Scenario: My example scenario
 	 *   Given an empty directory
-	 *   And FP files
+	 *   And FIN files
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given FP files
+	 * @Given FIN files
 	 */
-	public function given_fp_files(): void {
-		$this->download_fp();
+	public function given_fin_files(): void {
+		$this->download_fin();
 	}
 
 	/**
-	 * Create a fp-config.php file using `fp config create`.
+	 * Create a fin-config.php file using `fin config create`.
 	 *
 	 * ```
 	 * Scenario: My example scenario
 	 *   Given an empty directory
-	 *   And FP files
-	 *   And fp-config.php
+	 *   And FIN files
+	 *   And fin-config.php
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given fp-config.php
+	 * @Given fin-config.php
 	 */
-	public function given_fp_config_php(): void {
+	public function given_fin_config_php(): void {
 		$this->create_config();
 	}
 
@@ -385,20 +385,20 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
+	 *   Given a FIN installation
 	 *   ...
 	 *
 	 * Scenario: My other scenario
-	 *   Given a FP install
+	 *   Given a FIN install
 	 *   ...
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given a FP install(ation)
+	 * @Given a FIN install(ation)
 	 */
-	public function given_a_fp_installation(): void {
-		$this->install_fp();
+	public function given_a_fin_installation(): void {
+		$this->install_fin();
 	}
 
 	/**
@@ -406,22 +406,22 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation in 'foo'
+	 *   Given a FIN installation in 'foo'
 	 *   ...
 	 *
 	 * Scenario: My other scenario
-	 *   Given a FP install in 'bar'
+	 *   Given a FIN install in 'bar'
 	 *   ...
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given a FP install(ation) in :subdir
+	 * @Given a FIN install(ation) in :subdir
 	 *
 	 * @param string $subdir
 	 */
-	public function given_a_fp_installation_in_a_specific_folder( $subdir ): void {
-		$this->install_fp( $subdir );
+	public function given_a_fin_installation_in_a_specific_folder( $subdir ): void {
+		$this->install_fin( $subdir );
 	}
 
 	/**
@@ -429,20 +429,20 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation with Composer
+	 *   Given a FIN installation with Composer
 	 *   ...
 	 *
 	 * Scenario: My other scenario
-	 *   Given a FP install with Composer
+	 *   Given a FIN install with Composer
 	 *   ...
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given a FP install(ation) with Composer
+	 * @Given a FIN install(ation) with Composer
 	 */
-	public function given_a_fp_installation_with_composer(): void {
-		$this->install_fp_with_composer();
+	public function given_a_fin_installation_with_composer(): void {
+		$this->install_fin_with_composer();
 	}
 
 	/**
@@ -450,22 +450,22 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation with Composer and a custom vendor directory 'vendor-custom'
+	 *   Given a FIN installation with Composer and a custom vendor directory 'vendor-custom'
 	 *   ...
 	 *
 	 * Scenario: My other scenario
-	 *   Given a FP install with Composer with Composer and a custom vendor directory 'vendor-custom'
+	 *   Given a FIN install with Composer with Composer and a custom vendor directory 'vendor-custom'
 	 *   ...
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given a FP install(ation) with Composer and a custom vendor directory :vendor_directory
+	 * @Given a FIN install(ation) with Composer and a custom vendor directory :vendor_directory
 	 *
 	 * @param string $vendor_directory
 	 */
-	public function given_a_fp_installation_with_composer_and_a_custom_vendor_folder( $vendor_directory ): void {
-		$this->install_fp_with_composer( $vendor_directory );
+	public function given_a_fin_installation_with_composer_and_a_custom_vendor_folder( $vendor_directory ): void {
+		$this->install_fin_with_composer( $vendor_directory );
 	}
 
 	/**
@@ -475,27 +475,27 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP multisite subdomain installation
+	 *   Given a FIN multisite subdomain installation
 	 *   ...
 	 *
 	 * Scenario: My other scenario
-	 *   Given a FP subdirectory install
+	 *   Given a FIN subdirectory install
 	 *   ...
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given /^a FP multisite (subdirectory|subdomain)?\s?(install|installation)$/
+	 * @Given /^a FIN multisite (subdirectory|subdomain)?\s?(install|installation)$/
 	 *
 	 * @param string $type Multisite installation type.
 	 */
-	public function given_a_fp_multisite_installation( $type = 'subdirectory' ): void {
-		$this->install_fp();
+	public function given_a_fin_multisite_installation( $type = 'subdirectory' ): void {
+		$this->install_fin();
 		$subdomains = ! empty( $type ) && 'subdomain' === $type ? 1 : 0;
 		$this->proc(
-			'fp core install-network',
+			'fin core install-network',
 			array(
-				'title'      => 'FP CLI Network',
+				'title'      => 'FIN CLI Network',
 				'subdomains' => $subdomains,
 			)
 		)->run_check();
@@ -506,7 +506,7 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
+	 *   Given a FIN installation
 	 *   And these installed and active plugins:
 	 *     """
 	 *     akismet
@@ -524,48 +524,48 @@ FILE;
 		$plugins = implode( ' ', array_map( 'trim', explode( PHP_EOL, (string) $stream ) ) );
 		$plugins = $this->replace_variables( $plugins );
 
-		$this->proc( "fp plugin install $plugins --activate" )->run_check();
+		$this->proc( "fin plugin install $plugins --activate" )->run_check();
 	}
 
 	/**
-	 * Configure a custom `fp-content` directory.
+	 * Configure a custom `fin-content` directory.
 	 *
-	 * Defines the `FP_CONTENT_DIR`, `FP_PLUGIN_DIR`, and `FPMU_PLUGIN_DIR` constants.
+	 * Defines the `FIN_CONTENT_DIR`, `FIN_PLUGIN_DIR`, and `FINMU_PLUGIN_DIR` constants.
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP install
-	 *   And a custom fp-content directory
+	 *   Given a FIN install
+	 *   And a custom fin-content directory
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given a custom fp-content directory
+	 * @Given a custom fin-content directory
 	 */
-	public function given_a_custom_fp_directory(): void {
-		$fp_config_path = $this->variables['RUN_DIR'] . '/fp-config.php';
+	public function given_a_custom_fin_directory(): void {
+		$fin_config_path = $this->variables['RUN_DIR'] . '/fin-config.php';
 
-		$fp_config_code = file_get_contents( $fp_config_path );
+		$fin_config_code = file_get_contents( $fin_config_path );
 
-		$this->move_files( 'fp-content', 'my-content' );
-		$this->add_line_to_fp_config(
-			$fp_config_code,
-			"define( 'FP_CONTENT_DIR', dirname(__FILE__) . '/my-content' );"
+		$this->move_files( 'fin-content', 'my-content' );
+		$this->add_line_to_fin_config(
+			$fin_config_code,
+			"define( 'FIN_CONTENT_DIR', dirname(__FILE__) . '/my-content' );"
 		);
 
 		$this->move_files( 'my-content/plugins', 'my-plugins' );
-		$this->add_line_to_fp_config(
-			$fp_config_code,
-			"define( 'FP_PLUGIN_DIR', __DIR__ . '/my-plugins' );"
+		$this->add_line_to_fin_config(
+			$fin_config_code,
+			"define( 'FIN_PLUGIN_DIR', __DIR__ . '/my-plugins' );"
 		);
 
 		$this->move_files( 'my-content/mu-plugins', 'my-mu-plugins' );
-		$this->add_line_to_fp_config(
-			$fp_config_code,
-			"define( 'FPMU_PLUGIN_DIR', __DIR__ . '/my-mu-plugins' );"
+		$this->add_line_to_fin_config(
+			$fin_config_code,
+			"define( 'FINMU_PLUGIN_DIR', __DIR__ . '/my-mu-plugins' );"
 		);
 
-		file_put_contents( $fp_config_path, $fp_config_code );
+		file_put_contents( $fin_config_path, $fin_config_code );
 
 		if ( 'sqlite' === self::$db_type ) {
 			$db_dropin = $this->variables['RUN_DIR'] . '/my-content/db.php';
@@ -613,11 +613,11 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   When I run `fp package path`
+	 *   When I run `fin package path`
 	 *   Then save STDOUT as {PACKAGE_PATH}
 	 *
 	 * Scenario: My other scenario
-	 *   When I run `fp core download`
+	 *   When I run `fin core download`
 	 *   Then save STDOUT 'Downloading FinPress ([\d\.]+)' as {VERSION}
 	 * ```
 	 *
@@ -646,7 +646,7 @@ FILE;
 	}
 
 	/**
-	 * Build a new FP-CLI Phar file with a given version.
+	 * Build a new FIN-CLI Phar file with a given version.
 	 *
 	 * ```
 	 * Scenario: My example scenario
@@ -665,7 +665,7 @@ FILE;
 	}
 
 	/**
-	 * Download a specific FP-CLI Phar version from GitHub.
+	 * Download a specific FIN-CLI Phar version from GitHub.
 	 *
 	 * ```
 	 * Scenario: My example scenario
@@ -692,7 +692,7 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation with Composer
+	 *   Given a FIN installation with Composer
 	 *   And save the {RUN_DIR}/composer.json file as {COMPOSER_JSON}
 	 * ```
 	 *
@@ -721,46 +721,46 @@ FILE;
 	}
 
 	/**
-	 * Modify fp-config.php to set `FP_CONTENT_DIR` to an empty string.
+	 * Modify fin-config.php to set `FIN_CONTENT_DIR` to an empty string.
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP install
-	 *   And a misconfigured FP_CONTENT_DIR constant directory
+	 *   Given a FIN install
+	 *   And a misconfigured FIN_CONTENT_DIR constant directory
 	 *  ```
 	 *
 	 * @access public
 	 *
-	 * @Given a misconfigured FP_CONTENT_DIR constant directory
+	 * @Given a misconfigured FIN_CONTENT_DIR constant directory
 	 */
-	public function given_a_misconfigured_fp_content_dir_constant_directory(): void {
-		$fp_config_path = $this->variables['RUN_DIR'] . '/fp-config.php';
+	public function given_a_misconfigured_fin_content_dir_constant_directory(): void {
+		$fin_config_path = $this->variables['RUN_DIR'] . '/fin-config.php';
 
-		$fp_config_code = file_get_contents( $fp_config_path );
+		$fin_config_code = file_get_contents( $fin_config_path );
 
-		$this->add_line_to_fp_config(
-			$fp_config_code,
-			"define( 'FP_CONTENT_DIR', '' );"
+		$this->add_line_to_fin_config(
+			$fin_config_code,
+			"define( 'FIN_CONTENT_DIR', '' );"
 		);
 
-		file_put_contents( $fp_config_path, $fp_config_code );
+		file_put_contents( $fin_config_path, $fin_config_code );
 	}
 
 	/**
-	 * Add `fp-cli/fp-cli` as a Composer dependency.
+	 * Add `fin-cli/fin-cli` as a Composer dependency.
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation with Composer
-	 *   And a dependency on current fp-cli
+	 *   Given a FIN installation with Composer
+	 *   And a dependency on current fin-cli
 	 * ```
 	 *
 	 * @access public
 	 *
-	 * @Given a dependency on current fp-cli
+	 * @Given a dependency on current fin-cli
 	 */
-	public function given_a_dependency_on_fp_cli(): void {
-		$this->composer_require_current_fp_cli();
+	public function given_a_dependency_on_fin_cli(): void {
+		$this->composer_require_current_fin_cli();
 	}
 
 	/**
@@ -768,7 +768,7 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
+	 *   Given a FIN installation
 	 *   And a PHP built-in web server
 	 * ```
 	 *
@@ -785,7 +785,7 @@ FILE;
 	 *
 	 * ```
 	 * Scenario: My example scenario
-	 *   Given a FP installation
+	 *   Given a FIN installation
 	 *   And a PHP built-in web server to serve 'FinPress'
 	 * ```
 	 *

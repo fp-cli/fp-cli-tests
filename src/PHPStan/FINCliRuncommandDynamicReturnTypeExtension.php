@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace FP_CLI\Tests\PHPStan;
+namespace FIN_CLI\Tests\PHPStan;
 
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Arg;
@@ -22,10 +22,10 @@ use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\ObjectShapeType;
 use PHPStan\Type\NeverType;
 
-class FPCliRuncommandDynamicReturnTypeExtension implements DynamicStaticMethodReturnTypeExtension {
+class FINCliRuncommandDynamicReturnTypeExtension implements DynamicStaticMethodReturnTypeExtension {
 
 	public function getClass(): string {
-		return 'FP_CLI';
+		return 'FIN_CLI';
 	}
 
 	public function isStaticMethodSupported( MethodReflection $methodReflection ): bool {

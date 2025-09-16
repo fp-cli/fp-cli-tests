@@ -60,11 +60,11 @@ Feature: Make sure "Given", "When", "Then" steps work as expected
 
   Scenario: Special variables
 
-    When I run `echo {INVOKE_FP_CLI_WITH_PHP_ARGS-} cli info`
-    Then STDOUT should match /fp cli info/
+    When I run `echo {INVOKE_FIN_CLI_WITH_PHP_ARGS-} cli info`
+    Then STDOUT should match /fin cli info/
     And STDERR should be empty
 
-    When I run `echo {FP_VERSION-latest}`
+    When I run `echo {FIN_VERSION-latest}`
     Then STDOUT should match /\d\.\d/
     And STDERR should be empty
 

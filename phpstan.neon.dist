@@ -8,19 +8,19 @@ parameters:
   excludePaths:
     - tests/data
   scanDirectories:
-    - vendor/fp-cli/fp-cli
+    - vendor/fin-cli/fin-cli
     - vendor/phpunit/php-code-coverage
     - vendor/behat/behat
   scanFiles:
     - tests/phpstan/scan-files.php
   treatPhpDocTypesAsCertain: false
   dynamicConstantNames:
-    - FP_DEBUG
-    - FP_DEBUG_LOG
-    - FP_DEBUG_DISPLAY
+    - FIN_DEBUG
+    - FIN_DEBUG_LOG
+    - FIN_DEBUG_DISPLAY
   ignoreErrors:
-    # Needs fixing in FP-CLI.
-    - message: '#Parameter \#1 \$cmd of function FP_CLI\\Utils\\esc_cmd expects array<string>#'
+    # Needs fixing in FIN-CLI.
+    - message: '#Parameter \#1 \$cmd of function FIN_CLI\\Utils\\esc_cmd expects array<string>#'
     - message: '#Dynamic call to static method#'
       path: 'tests/tests'
   strictRules:

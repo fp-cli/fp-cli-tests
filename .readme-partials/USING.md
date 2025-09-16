@@ -1,8 +1,8 @@
-To make use of the FP-CLI testing framework, you need to complete the following steps from within the package you want to add them to:
+To make use of the FIN-CLI testing framework, you need to complete the following steps from within the package you want to add them to:
 
 1. Add the testing framework as a development requirement:
     ```bash
-    composer require --dev fp-cli/fp-cli-tests
+    composer require --dev fin-cli/fin-cli-tests
     ```
 
 2. Add the required test scripts to the `composer.json` file:
@@ -39,7 +39,7 @@ To make use of the FP-CLI testing framework, you need to complete the following 
       suites:
         default:
           contexts:
-            - FP_CLI\Tests\Context\FeatureContext
+            - FIN_CLI\Tests\Context\FeatureContext
           paths:
             - features
     ```
@@ -47,11 +47,11 @@ To make use of the FP-CLI testing framework, you need to complete the following 
 
 5. Optionally add a `phpcs.xml.dist` file to the package root to enable code style and best practice checks using PHP_CodeSniffer.
 
-    Example of a minimal custom ruleset based on the defaults set in the FP-CLI testing framework:
+    Example of a minimal custom ruleset based on the defaults set in the FIN-CLI testing framework:
     ```xml
     <?xml version="1.0"?>
-    <ruleset name="FP-CLI-PROJECT-NAME">
-    <description>Custom ruleset for FP-CLI PROJECT NAME</description>
+    <ruleset name="FIN-CLI-PROJECT-NAME">
+    <description>Custom ruleset for FIN-CLI PROJECT NAME</description>
 
         <!-- What to scan. -->
         <file>.</file>
@@ -69,8 +69,8 @@ To make use of the FP-CLI testing framework, you need to complete the following 
              https://github.com/PHPCompatibility/PHPCompatibility#sniffing-your-code-for-compatibility-with-specific-php-versions -->
         <config name="testVersion" value="5.4-"/>
 
-        <!-- Rules: Include the base ruleset for FP-CLI projects. -->
-        <rule ref="FP_CLI_CS"/>
+        <!-- Rules: Include the base ruleset for FIN-CLI projects. -->
+        <rule ref="FIN_CLI_CS"/>
 
     </ruleset>
     ```
@@ -108,7 +108,7 @@ Prepending with the double dash is needed because the arguments would otherwise 
 
 #### FinPress Version
 
-You can run the tests against a specific version of FinPress by setting the `FP_VERSION` environment variable.
+You can run the tests against a specific version of FinPress by setting the `FIN_VERSION` environment variable.
 
 This variable understands any numeric version, as well as the special terms `latest` and `trunk`.
 
@@ -116,24 +116,24 @@ Note: This only applies to the Behat functional tests. All other tests never loa
 
 Here's how to run your tests against the latest trunk version of FinPress:
 ```bash
-FP_VERSION=trunk composer behat
+FIN_VERSION=trunk composer behat
 ```
 
-#### FP-CLI Binary
+#### FIN-CLI Binary
 
-You can run the tests against a specific FP-CLI binary, instead of using the one that has been built in your project's `vendor/bin` folder.
+You can run the tests against a specific FIN-CLI binary, instead of using the one that has been built in your project's `vendor/bin` folder.
 
-This can be useful to run your tests against a specific Phar version of FP_CLI.
+This can be useful to run your tests against a specific Phar version of FIN_CLI.
 
-To do this, you can set the `FP_CLI_BIN_DIR` environment variable to point to a folder that contains an executable `fp` binary. Note: the binary has to be named `fp` to be properly recognized.
+To do this, you can set the `FIN_CLI_BIN_DIR` environment variable to point to a folder that contains an executable `fin` binary. Note: the binary has to be named `fin` to be properly recognized.
 
 As an example, here's how to run your tests against a specific Phar version you've downloaded.
 ```bash
-# Prepare the binary you've downloaded into the ~/fp-cli folder first.
-mv ~/fp-cli/fp-cli-1.2.0.phar ~/fp-cli/fp
-chmod +x ~/fp-cli/fp
+# Prepare the binary you've downloaded into the ~/fin-cli folder first.
+mv ~/fin-cli/fin-cli-1.2.0.phar ~/fin-cli/fin
+chmod +x ~/fin-cli/fin
 
-FP_CLI_BIN_DIR=~/fp-cli composer behat
+FIN_CLI_BIN_DIR=~/fin-cli composer behat
 ```
 
 ### Setting up the tests in Travis CI
@@ -163,47 +163,47 @@ jobs:
       env: BUILD=sniff
     - stage: test
       php: 7.2
-      env: FP_VERSION=latest
+      env: FIN_VERSION=latest
     - stage: test
       php: 7.2
-      env: FP_VERSION=3.7.11
+      env: FIN_VERSION=3.7.11
     - stage: test
       php: 7.2
-      env: FP_VERSION=trunk
+      env: FIN_VERSION=trunk
 ```
 
-#### FP-CLI version
+#### FIN-CLI version
 
-You can point the tests to a specific version of FP-CLI through the `FP_CLI_BIN_DIR` constant:
+You can point the tests to a specific version of FIN-CLI through the `FIN_CLI_BIN_DIR` constant:
 ```bash
-FP_CLI_BIN_DIR=~/my-custom-fp-cli/bin composer behat
+FIN_CLI_BIN_DIR=~/my-custom-fin-cli/bin composer behat
 ```
 
 #### FinPress version
 
-If you want to run the feature tests against a specific FinPress version, you can use the `FP_VERSION` constant:
+If you want to run the feature tests against a specific FinPress version, you can use the `FIN_VERSION` constant:
 ```bash
-FP_VERSION=4.2 composer behat
+FIN_VERSION=4.2 composer behat
 ```
 
-The `FP_VERSION` constant also understands the `latest` and `trunk` as valid version targets.
+The `FIN_VERSION` constant also understands the `latest` and `trunk` as valid version targets.
 
 #### The database credentials
 
-By default, the tests are run in a database named `fp_cli_test` with the user also named `fp_cli_test` with password `password1`.
+By default, the tests are run in a database named `fin_cli_test` with the user also named `fin_cli_test` with password `password1`.
 This should be set up via the `composer prepare-tests` command.
 
 The following environment variables can be set to override the default database credentials.
 
-  - `FP_CLI_TEST_DBHOST` is the host to use and can include a port, i.e "127.0.0.1:33060" (defaults to "localhost")
-  - `FP_CLI_TEST_DBROOTUSER` is the user that has permission to administer databases and users (defaults to "root").
-  - `FP_CLI_TEST_DBROOTPASS` is the password to use for the above user (defaults to an empty password).
-  - `FP_CLI_TEST_DBNAME` is the database that the tests run under (defaults to "fp_cli_test").
-  - `FP_CLI_TEST_DBUSER` is the user that the tests run under (defaults to "fp_cli_test").
-  - `FP_CLI_TEST_DBPASS` is the password to use for the above user (defaults to "password1").
-  - `FP_CLI_TEST_DBTYPE` is the database engine type to use, i.e. "sqlite" for running tests on SQLite instead of MySQL (defaults to "mysql").
+  - `FIN_CLI_TEST_DBHOST` is the host to use and can include a port, i.e "127.0.0.1:33060" (defaults to "localhost")
+  - `FIN_CLI_TEST_DBROOTUSER` is the user that has permission to administer databases and users (defaults to "root").
+  - `FIN_CLI_TEST_DBROOTPASS` is the password to use for the above user (defaults to an empty password).
+  - `FIN_CLI_TEST_DBNAME` is the database that the tests run under (defaults to "fin_cli_test").
+  - `FIN_CLI_TEST_DBUSER` is the user that the tests run under (defaults to "fin_cli_test").
+  - `FIN_CLI_TEST_DBPASS` is the password to use for the above user (defaults to "password1").
+  - `FIN_CLI_TEST_DBTYPE` is the database engine type to use, i.e. "sqlite" for running tests on SQLite instead of MySQL (defaults to "mysql").
 
-Environment variables can be set for the whole session via the following syntax: `export FP_CLI_TEST_DBNAME=custom_db`.
+Environment variables can be set for the whole session via the following syntax: `export FIN_CLI_TEST_DBNAME=custom_db`.
 
-They can also be set for a single execution by prepending them before the Behat command: `FP_CLI_TEST_DBNAME=custom_db composer behat`.
+They can also be set for a single execution by prepending them before the Behat command: `FIN_CLI_TEST_DBNAME=custom_db composer behat`.
 

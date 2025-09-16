@@ -6,9 +6,9 @@
 
 declare(strict_types=1);
 
-namespace FP_CLI\Tests\Tests\PHPStan;
+namespace FIN_CLI\Tests\Tests\PHPStan;
 
-use function FP_CLI\Utils\parse_url;
+use function FIN_CLI\Utils\parse_url;
 use function PHPStan\Testing\assertType;
 
 /** @var int $integer */
